@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CS202 · Lecture 1 — Intro to Computer Architecture &amp; Organization</title>
+<style>
+/* ==========================================================
+   CS202 study pages — shared design system
+   ========================================================== */
+:root{
+  --bg:#0d1220; --card:#172038; --card2:#1d2848; --line:#2a3862;
+  --text:#eaf0ff; --muted:#9fb0d8;
+  --accent:#7aa8ff; --accent-rgb:122,168,255; --on-accent:#0a1226;
+  --ok:#4ade80; --ok-rgb:74,222,128;
+  --bad:#ff7b8c; --bad-rgb:255,123,140;
+  --warn:#fbbf24; --warn-rgb:251,191,36;
+  --c-plan:#4cc9f0; --c-plan-rgb:76,201,240;
+  --c-ana:#fbbf24;  --c-ana-rgb:251,191,36;
+  --c-des:#b69cff;  --c-des-rgb:182,156,255;
+  --c-imp:#4ade80;  --c-imp-rgb:74,222,128;
+  --shadow:0 12px 32px rgba(0,0,0,.35);
+  --radius:18px;
+}
+[data-theme="light"]{
+  --bg:#f5f2ea; --card:#ffffff; --card2:#f6f3ec; --line:#ddd6c3;
+  --text:#1b2336; --muted:#5a6684;
+  --accent:#2f66e0; --accent-rgb:47,102,224; --on-accent:#ffffff;
+  --ok:#15803d; --ok-rgb:21,128,61;
+  --bad:#c0263d; --bad-rgb:192,38,61;
+  --warn:#a85d00; --warn-rgb:168,93,0;
+  --c-plan:#0b84a8; --c-plan-rgb:11,132,168;
+  --c-ana:#b86e00;  --c-ana-rgb:184,110,0;
+  --c-des:#6b44e0;  --c-des-rgb:107,68,224;
+  --c-imp:#17803d;  --c-imp-rgb:23,128,61;
+  --shadow:0 10px 26px rgba(70,55,20,.12);
+}
+
+/* colour helpers: put on any element, children read --c / --c-rgb */
+.ph-plan{--c:var(--c-plan);--c-rgb:var(--c-plan-rgb)}
+.ph-ana{--c:var(--c-ana);--c-rgb:var(--c-ana-rgb)}
+.ph-des{--c:var(--c-des);--c-rgb:var(--c-des-rgb)}
+.ph-imp{--c:var(--c-imp);--c-rgb:var(--c-imp-rgb)}
+.t-ok{--c:var(--ok);--c-rgb:var(--ok-rgb)}
+.t-warn{--c:var(--warn);--c-rgb:var(--warn-rgb)}
+.t-bad{--c:var(--bad);--c-rgb:var(--bad-rgb)}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+body{
+  margin:0;min-height:100vh;color:var(--text);
+  font:17px/1.85 "Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;
+  background:
+    radial-gradient(900px 480px at 85% -8%,rgba(var(--accent-rgb),.14),transparent 62%),
+    radial-gradient(700px 420px at 5% 14%,rgba(var(--c-des-rgb),.08),transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+}
+b,strong{font-weight:700}
+button{font-family:inherit}
+h2{font-size:32px;line-height:1.35;margin:0 0 6px}
+h3{font-size:20px;margin:0 0 10px}
+h4{font-size:17px;margin:0 0 8px}
+.sec{margin:30px 0 12px;font-size:21px}
+.sec small{color:var(--muted);font-weight:400;font-size:14px}
+.lead{color:var(--muted);margin:0 0 18px;font-size:18px}
+.muted{color:var(--muted)}
+.en{direction:ltr;unicode-bidi:isolate;font-family:"Segoe UI",system-ui,sans-serif;font-weight:600}
+.en.plain{font-weight:400}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
+  padding:10px clamp(12px,3vw,28px);
+  background:var(--bg);
+  background:color-mix(in srgb,var(--bg) 84%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+}
+.home,.icon-btn{
+  width:40px;height:40px;display:grid;place-items:center;border-radius:12px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);
+  text-decoration:none;font-size:18px;cursor:pointer;flex:none;
+}
+.home:hover,.icon-btn:hover{border-color:var(--accent)}
+.ttl{display:flex;flex-direction:column;line-height:1.3}
+.ttl small{color:var(--muted);font-size:13px}
+.prog{margin-inline-start:auto;display:flex;align-items:center;gap:10px;min-width:150px;color:var(--muted);font-size:14px}
+.bar{flex:1;height:9px;border-radius:99px;background:rgba(var(--accent-rgb),.16);overflow:hidden;min-width:90px}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--c-imp));transition:width .5s}
+
+/* ---------- layout + nav ---------- */
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px;max-width:1160px;margin:0 auto;padding:24px clamp(12px,3vw,24px) 70px;align-items:start}
+.nav{position:sticky;top:78px;display:flex;flex-direction:column;gap:6px}
+.nav button{
+  display:flex;align-items:center;gap:10px;text-align:start;width:100%;
+  background:transparent;border:1px solid transparent;color:var(--muted);
+  padding:9px 12px;border-radius:14px;cursor:pointer;font-size:15px;transition:.18s;
+}
+.nav button:hover{background:rgba(var(--accent-rgb),.08);color:var(--text)}
+.nav .num{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;background:var(--card2);border:1px solid var(--line)}
+.nav .lbl{flex:1}
+.nav .tick{opacity:0;color:var(--ok);font-weight:800}
+.nav button.on{background:var(--card);border-color:var(--line);color:var(--text);box-shadow:var(--shadow)}
+.nav button.on .num{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.nav button.done .tick{opacity:1}
+
+/* ---------- stations ---------- */
+.station{display:none}
+.station.on{display:block;animation:rise .45s ease}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.station-foot{display:flex;justify-content:space-between;gap:12px;margin-top:34px;padding-top:18px;border-top:1px dashed var(--line)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);margin:16px 0}
+.card.tint{border-top:4px solid var(--c)}
+.card.tint h4{color:var(--c)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:14px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);font-size:16px;font-weight:600;
+  cursor:pointer;transition:.18s;text-decoration:none;
+}
+.btn:hover{transform:translateY(-1px);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.btn.good{background:rgba(var(--ok-rgb),.16);border-color:rgba(var(--ok-rgb),.55)}
+.btn.bad{background:rgba(var(--bad-rgb),.14);border-color:rgba(var(--bad-rgb),.5)}
+.btn.ghost{background:transparent}
+
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 14px;margin:4px;border-radius:999px;font-size:15px;line-height:1.7;
+  background:rgba(var(--c-rgb,var(--accent-rgb)),.14);border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.45);
+}
+.chip.en{font-weight:600}
+.note{margin:14px 0;padding:12px 16px;border-radius:14px;background:rgba(var(--c-rgb,var(--accent-rgb)),.1);border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.38)}
+.note.warn{--c-rgb:var(--warn-rgb)}
+.note.ok{--c-rgb:var(--ok-rgb)}
+.note.bad{--c-rgb:var(--bad-rgb)}
+
+/* ---------- tabs / panes / segmented ---------- */
+.pane{display:none}
+.pane.on{display:block;animation:rise .35s ease}
+.seg{display:inline-flex;gap:6px;padding:5px;border-radius:16px;background:var(--card2);border:1px solid var(--line);flex-wrap:wrap;margin-bottom:14px}
+.seg button{border:0;background:transparent;color:var(--muted);padding:9px 18px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:.18s}
+.seg button.on{background:rgba(var(--c-rgb,var(--accent-rgb)),.2);color:var(--text);box-shadow:inset 0 0 0 1.5px rgba(var(--c-rgb,var(--accent-rgb)),.7)}
+
+/* ---------- big picture ---------- */
+.story{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}
+.beat{flex:1;min-width:150px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:14px;border-radius:16px;background:rgba(var(--bad-rgb),.1);border:1px solid rgba(var(--bad-rgb),.4)}
+.beat.ok{background:rgba(var(--ok-rgb),.12);border-color:rgba(var(--ok-rgb),.5)}
+.beat .emo{font-size:30px;line-height:1.3}
+.arrow{align-self:center;font-size:22px;color:var(--muted)}
+.punch{text-align:center;font-size:20px;font-weight:700;margin:16px 0 12px}
+.tile{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:start;padding:18px;border-radius:18px;
+  border:1px solid rgba(var(--c-rgb),.45);background:linear-gradient(155deg,rgba(var(--c-rgb),.2),var(--card) 72%);
+  color:var(--text);cursor:pointer;transition:.2s;font-size:17px;
+}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.tile .emo{font-size:30px;line-height:1.3}
+.tile small{color:var(--muted);font-size:14.5px}
+
+/* ---------- translator diagram ---------- */
+.trans{display:flex;align-items:center;justify-content:center;gap:8px;direction:ltr;flex-wrap:wrap;margin-bottom:16px}
+.trans>*{direction:rtl}
+.tnode{
+  display:flex;flex-direction:column;align-items:center;gap:0;min-width:160px;padding:14px 18px;border-radius:18px;
+  border:1.5px solid rgba(var(--c-rgb),.4);background:rgba(var(--c-rgb),.1);color:var(--text);cursor:pointer;transition:.2s;font-size:16px;
+}
+.tnode .emo{font-size:30px;line-height:1.3}
+.tnode.on{background:rgba(var(--c-rgb),.24);border-color:var(--c);transform:translateY(-3px);box-shadow:0 8px 22px rgba(var(--c-rgb),.25)}
+.tlink{font-size:26px;color:var(--muted)}
+.bigq{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.bigq .chip{font:800 20px/1.5 "Segoe UI",sans-serif;padding:6px 20px}
+
+/* ---------- flip cards (roles) ---------- */
+.flip{perspective:1000px;cursor:pointer;outline:none}
+.flip-in{display:grid;min-height:170px;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.flip.open .flip-in{transform:rotateY(180deg)}
+.flip .face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;padding:16px 18px;
+  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:4px;
+  border:1px solid rgba(var(--c-rgb,var(--accent-rgb)),.5);
+  background:linear-gradient(155deg,rgba(var(--c-rgb,var(--accent-rgb)),.2),var(--card) 75%);
+}
+.flip .front .emo{font-size:32px;line-height:1.3}
+.flip .front b{font-size:18px}
+.flip .front small{color:var(--muted)}
+.flip .back{transform:rotateY(180deg);background:var(--card2);font-size:16px;line-height:1.75}
+.flip:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:18px}
+.hint{color:var(--muted);font-size:13px}
+
+/* ---------- SDLC path ---------- */
+.path{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;direction:ltr;margin:6px 0 18px}
+.node{
+  position:relative;direction:rtl;display:flex;flex-direction:column;align-items:center;gap:2px;padding:16px 10px;border-radius:20px;
+  border:1.5px solid rgba(var(--c-rgb),.4);background:rgba(var(--c-rgb),.09);color:var(--text);cursor:pointer;transition:.22s;text-align:center;font-size:15px;
+}
+.node i{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font:800 24px/1 "Segoe UI",sans-serif;font-style:normal;background:rgba(var(--c-rgb),.25);color:var(--c);margin-bottom:4px;transition:.22s}
+.node b{font-size:18px;font-family:"Segoe UI",sans-serif}
+.node small{color:var(--muted);font-size:13.5px;line-height:1.4}
+.node:not(:last-child)::after{content:"➜";position:absolute;right:-22px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px}
+.node.on{background:rgba(var(--c-rgb),.22);border-color:var(--c);transform:translateY(-4px);box-shadow:0 12px 26px rgba(var(--c-rgb),.28)}
+.node.on i{background:var(--c);color:var(--bg)}
+.node b,.node small,.ph-head .q,.tile b.en{direction:ltr;unicode-bidi:isolate}
+.mnemo{text-align:center;font-size:19px;margin:0 0 14px;color:var(--muted)}
+.mnemo b{color:var(--text)}
+.panel{background:var(--card);border:1px solid rgba(var(--c-rgb),.5);border-top:5px solid var(--c);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+.ph-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.ph-head .q{font:800 24px/1.3 "Segoe UI",sans-serif;color:var(--c);padding:4px 16px;border-radius:12px;background:rgba(var(--c-rgb),.15)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:10px 0}
+.steps li{counter-increment:s;position:relative;padding:6px 0;padding-inline-start:50px;margin:6px 0}
+.steps li::before{content:counter(s);position:absolute;inset-inline-start:0;top:6px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:rgba(var(--c-rgb),.2);color:var(--c)}
+.deliv{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+
+/* ---------- BPM ---------- */
+.cycle{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;direction:ltr}
+.cycle>div{direction:rtl;padding:14px;border-radius:16px;background:var(--card2);border:1px solid var(--line);font-size:15.5px;line-height:1.65}
+.cycle .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-weight:800;margin-bottom:6px}
+.loopnote{text-align:center;color:var(--muted);margin:10px 0 0}
+.range-wrap{direction:ltr;padding:6px 6px 0}
+.range-wrap input{width:100%;height:10px;accent-color:var(--accent);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;direction:ltr;font:800 16px "Segoe UI",sans-serif;margin-top:8px}
+.ticks span{cursor:pointer;padding:4px 14px;border-radius:10px;color:var(--muted);transition:.18s}
+.ticks span.on{background:rgba(var(--c-rgb),.22);color:var(--text)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:16px 0 8px}
+.metric small{display:flex;justify-content:space-between;color:var(--muted);margin-bottom:4px}
+.meter{direction:ltr;position:relative;height:12px;border-radius:99px;background:linear-gradient(90deg,var(--ok),var(--warn),var(--bad));overflow:hidden}
+.meter i{position:absolute;top:0;bottom:0;right:0;width:100%;background:var(--card2);transition:width .55s cubic-bezier(.2,.8,.2,1)}
+
+/* ---------- decks (games / quiz) ---------- */
+.deck{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 22px;box-shadow:var(--shadow);margin:14px 0}
+.deck-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;color:var(--muted);font-size:15px}
+.cnt,.fc-count{direction:ltr;unicode-bidi:isolate}
+.deck-bar{flex:1;height:8px;border-radius:99px;background:rgba(var(--accent-rgb),.16);overflow:hidden}
+.deck-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--c-imp));transition:width .4s}
+.deck-q{font-size:21px;font-weight:600;line-height:1.7;margin:4px 0 16px;min-height:56px}
+.opts{display:grid;gap:10px}
+.opts.c2{grid-template-columns:repeat(2,1fr)}
+.opts.c3{grid-template-columns:repeat(3,1fr)}
+.opt{
+  text-align:start;padding:13px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);
+  color:var(--text);font-size:17px;cursor:pointer;transition:.18s;line-height:1.6;
+}
+.opt.ph-plan,.opt.ph-ana,.opt.ph-des,.opt.ph-imp,.opt.t-ok,.opt.t-warn,.opt.t-bad{border-color:rgba(var(--c-rgb),.55);background:rgba(var(--c-rgb),.1);font-weight:600}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--ok);background:rgba(var(--ok-rgb),.2)}
+.opt.wrong{border-color:var(--bad);background:rgba(var(--bad-rgb),.2)}
+.fb{margin-top:16px;padding:14px 16px;border-radius:14px;animation:rise .3s ease}
+.fb.ok{background:rgba(var(--ok-rgb),.13);border:1px solid rgba(var(--ok-rgb),.5)}
+.fb.no{background:rgba(var(--bad-rgb),.12);border:1px solid rgba(var(--bad-rgb),.5)}
+.fb .btn{margin-top:10px}
+.deck-end{text-align:center;padding:12px 0}
+.deck-end .big{font:800 56px/1.2 "Segoe UI",sans-serif;color:var(--accent)}
+
+/* ---------- flashcards ---------- */
+.fc{background:transparent}
+.fc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.fc-top .seg{margin:0}
+.fc-card{perspective:1200px;cursor:pointer;outline:none;margin:10px 0 14px}
+.fc-in{display:grid;min-height:270px;transition:transform .6s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.fc-card.open .fc-in{transform:rotateY(180deg)}
+.fc-in .face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:24px;padding:28px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;
+  border:1px solid var(--line);font-size:23px;line-height:1.7;box-shadow:var(--shadow);
+}
+.fc-in .front{background:linear-gradient(160deg,rgba(var(--accent-rgb),.22),var(--card))}
+.fc-in .back{background:linear-gradient(160deg,rgba(var(--ok-rgb),.18),var(--card));transform:rotateY(180deg);font-size:19.5px}
+.fc-in small{color:var(--muted);font-size:13.5px}
+.fc-card:focus-visible .fc-in .front{outline:2px solid var(--accent)}
+.fc-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.fc-stat{text-align:center;margin:8px 0 0}
+
+/* ---------- essay ---------- */
+.essay textarea{width:100%;min-height:110px;resize:vertical;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2);color:var(--text);font:16px/1.7 "Segoe UI",sans-serif;margin:8px 0 12px}
+.essay textarea:focus{outline:none;border-color:var(--accent)}
+.model{margin-top:14px;animation:rise .3s ease}
+.mdl{padding:14px 16px;border-radius:14px;background:rgba(var(--ok-rgb),.1);border:1px solid rgba(var(--ok-rgb),.4);margin-bottom:12px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}
+.chk input{width:20px;height:20px;margin-top:5px;accent-color:var(--ok);flex:none}
+.pts-sc{font-weight:700;margin-top:6px;color:var(--ok)}
+
+/* ---------- tables (summary) ---------- */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;border:1px solid var(--line);font-size:15.5px;line-height:1.65;margin:8px 0 18px}
+.tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl th{background:var(--card2);font-size:14.5px;color:var(--muted)}
+.tbl td:first-child{font-weight:700;white-space:nowrap}
+.tbl .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-inline-end:8px}
+
+/* ---------- calculators / inputs ---------- */
+.calc-top{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.calc-top label{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.calc input[type=number]{width:100%;max-width:132px;padding:7px 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--card2);color:var(--text);font:600 16px "Segoe UI",sans-serif;direction:ltr;text-align:right}
+.calc input[type=number]:focus{outline:none;border-color:var(--accent)}
+.calc-top input[type=number]{max-width:90px}
+.calc input[type=range]{accent-color:var(--accent);cursor:pointer;direction:ltr;width:170px}
+main{min-width:0}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:4px 0;direction:ltr}
+.ctbl{min-width:680px;direction:ltr;margin:0}
+.ctbl th,.ctbl td{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ctbl th:first-child,.ctbl td:first-child{text-align:left}
+.ctbl input[type=number]{min-width:112px}
+.tbl.ctbl td:first-child{white-space:nowrap}
+.ctbl.sm{min-width:0}
+.ctbl.sm input[type=number]{min-width:0}
+.ctbl.sm th,.ctbl.sm td{white-space:normal}
+.tbl.ctbl.sm td:first-child{white-space:nowrap}
+.ctbl .neg{color:var(--bad)}
+.ctbl .pos{color:var(--ok)}
+.ctbl tr.tot td{background:var(--card2);font-weight:700}
+.res-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:14px}
+.res{padding:12px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--line)}
+.res small{display:block;color:var(--muted);font-size:14px}
+.res b{display:block;font:800 22px/1.5 "Segoe UI",sans-serif;direction:ltr;unicode-bidi:isolate;text-align:start}
+.res.pos{border-color:rgba(var(--ok-rgb),.6);background:rgba(var(--ok-rgb),.12)}
+.res.neg{border-color:rgba(var(--bad-rgb),.6);background:rgba(var(--bad-rgb),.12)}
+.verdict{margin-top:14px;padding:12px 16px;border-radius:14px;font-weight:700;font-size:18px;background:var(--card2);border:1px solid var(--line)}
+.verdict.pos{background:rgba(var(--ok-rgb),.14);border-color:rgba(var(--ok-rgb),.55)}
+.verdict.neg{background:rgba(var(--bad-rgb),.13);border-color:rgba(var(--bad-rgb),.55)}
+.checks{display:grid;gap:4px;margin-bottom:10px}
+.checks .chk{padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);margin:0}
+.checks .chk:hover{border-color:var(--accent)}
+.formula{direction:ltr;unicode-bidi:isolate;text-align:center;font:700 19px/1.9 "Segoe UI",sans-serif;padding:12px 16px;border-radius:14px;background:rgba(var(--accent-rgb),.1);border:1px solid rgba(var(--accent-rgb),.4);margin:12px 0}
+.formula small{display:block;font:400 14px "Segoe UI",sans-serif;color:var(--muted)}
+
+/* ---------- share disclaimer (footer injected by core.js) ---------- */
+.disclaimer{max-width:1160px;margin:0 auto;padding:0 clamp(12px,3vw,24px) 46px}
+.disclaimer>div{padding:14px 18px;border-radius:16px;border:1px solid rgba(var(--warn-rgb),.5);background:rgba(var(--warn-rgb),.08);font-size:14.5px;line-height:1.85;color:var(--muted)}
+.disclaimer b{color:var(--text)}
+.disclaimer .d-en{direction:ltr;text-align:left;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(var(--warn-rgb),.4);font-family:"Segoe UI",system-ui,sans-serif;font-size:13.5px;line-height:1.7}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:12px;padding-top:12px}
+  .nav{position:sticky;top:60px;z-index:20;flex-direction:row;overflow-x:auto;gap:6px;padding:8px 2px;background:var(--bg)}
+  .nav{scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{width:auto;flex:none;padding:6px 10px}
+  .nav button:not(.on) .lbl{display:none}
+  .nav .tick{display:none}
+  .nav button.done .num{background:var(--ok);color:#06210f;border-color:transparent}
+  .ttl small{display:none}
+}
+@media (max-width:700px){
+  body{font-size:16px}
+  h2{font-size:26px}
+  .path{grid-template-columns:repeat(2,1fr);gap:12px}
+  .node::after{display:none!important}
+  .cycle{grid-template-columns:repeat(2,1fr)}
+  .opts.c3{grid-template-columns:1fr}
+  .metrics{grid-template-columns:1fr}
+  .prog{min-width:0}
+  .tbl{font-size:14px}
+  .tbl th,.tbl td{padding:8px 7px}
+  .tbl td:first-child{white-space:normal}
+  .prog .bar{min-width:50px}
+  .card.calc{padding:16px 10px}
+  .calc input[type=number]{padding:6px 4px;font-size:15px}
+  .ctbl.sm th,.ctbl.sm td{padding:8px 4px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- print: only the summary station ---------- */
+@media print{
+  :root,[data-theme="dark"],[data-theme="light"]{--bg:#fff;--card:#fff;--card2:#f3f3f3;--line:#ccc;--text:#111;--muted:#444;--shadow:none}
+  body{background:#fff!important;font-size:12pt;line-height:1.55}
+  .topbar,.nav,.station-foot,.noprint{display:none!important}
+  .layout{display:block;padding:0}
+  .station{display:none!important}
+  .station.summary{display:block!important}
+  .card,.panel{box-shadow:none;break-inside:avoid}
+  .tbl{break-inside:avoid}
+}
+
+</style>
+<style>
+  /* ---- lecture-1 local styles ---- */
+  :root{--c-f:#fb923c;--c-f-rgb:251,146,60;--c-dc:#f472b6;--c-dc-rgb:244,114,182;--c-ex:#2dd4bf;--c-ex-rgb:45,212,191}
+  [data-theme="light"]{--c-f:#c2570c;--c-f-rgb:194,87,12;--c-dc:#be2e7c;--c-dc-rgb:190,46,124;--c-ex:#0f766e;--c-ex-rgb:15,118,110}
+  .ph-f{--c:var(--c-f);--c-rgb:var(--c-f-rgb)}
+  .ph-dc{--c:var(--c-dc);--c-rgb:var(--c-dc-rgb)}
+  .ph-ex{--c:var(--c-ex);--c-rgb:var(--c-ex-rgb)}
+  .opt.ph-f,.opt.ph-dc,.opt.ph-ex{border-color:rgba(var(--c-rgb),.55);background:rgba(var(--c-rgb),.1);font-weight:600}
+  .fig{direction:ltr;margin:10px 0}
+  .fig svg{width:100%;height:auto;display:block;max-width:740px;margin:0 auto}
+  .fig svg text{fill:var(--text);font:600 15px "Segoe UI",system-ui,sans-serif}
+  .fig svg text.sm{font-size:12.5px;fill:var(--muted);font-weight:400}
+  .fig svg text.lbl-a{fill:var(--c-plan)} .fig svg text.lbl-d{fill:var(--c-ana)} .fig svg text.lbl-c{fill:var(--c-des)}
+  .blk{fill:var(--card2);stroke:var(--line);stroke-width:1.6;cursor:pointer;transition:.18s}
+  g[data-part]:hover .blk{stroke:var(--accent)}
+  g[data-part]{outline:none}
+  g[data-part]:focus-visible .blk{stroke:var(--accent);stroke-width:3}
+  .blk.sel,.blk.hl{stroke:var(--accent);stroke-width:3.2;fill:rgba(var(--accent-rgb),.24)}
+  .blk.cpu{fill:rgba(var(--accent-rgb),.05);stroke-dasharray:6 4}
+  .ln{fill:none;stroke-width:2.2;transition:.18s}
+  .ln.d{stroke:var(--muted)} .ln.c{stroke:var(--ok);stroke-dasharray:6 4}
+  .ln.hl{stroke:var(--accent);stroke-width:4.5}
+  .mk.d{fill:var(--muted)} .mk.c{fill:var(--ok)}
+  .bus{fill:none;stroke-width:5;stroke-linecap:round;opacity:.9;transition:.2s}
+  .bus.a{stroke:var(--c-plan)} .bus.d{stroke:var(--c-ana)} .bus.c{stroke:var(--c-des)}
+  .bus.dim{opacity:.28} .bus.hl{stroke-width:8;opacity:1}
+  .tap{fill:none;stroke-width:2.2;opacity:.6}
+  .tap.a{stroke:var(--c-plan)} .tap.d{stroke:var(--c-ana)} .tap.c{stroke:var(--c-des)}
+  .mk.a{fill:var(--c-plan)} .mk.dd{fill:var(--c-ana)} .mk.cc{fill:var(--c-des)}
+  .dotg circle{stroke:var(--bg);stroke-width:2}
+  .dotg.a circle{fill:var(--c-plan)} .dotg.d circle{fill:var(--c-ana)} .dotg.c circle{fill:var(--c-des)}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;color:var(--muted);font-size:14px;margin:4px 0 8px}
+  .legend i{display:inline-block;width:34px;height:0;border-top:3px solid var(--muted);vertical-align:middle;margin-inline-end:6px}
+  .legend i.c{border-top:3px dashed var(--ok)}
+  .caption{min-height:62px}
+  .steplog{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px}
+  .steplog li{padding:8px 12px;border-radius:12px;background:rgba(var(--c-rgb),.12);border:1px solid rgba(var(--c-rgb),.5);animation:rise .3s ease}
+  /* instruction cycle simulator */
+  .ic-badge{display:inline-block;font:800 20px/1.4 "Segoe UI",sans-serif;padding:4px 18px;border-radius:12px;background:rgba(var(--c-rgb,var(--accent-rgb)),.2);color:var(--c,var(--text));margin-bottom:10px;direction:ltr}
+  .ic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:8px 0 12px}
+  .ic-box{padding:10px 12px;border-radius:14px;background:var(--card2);border:1.5px solid var(--line);transition:.2s;direction:ltr;text-align:left}
+  .ic-box small{display:block;color:var(--muted);font-size:12.5px}
+  .ic-box b{display:block;font:800 17px/1.5 "Segoe UI",sans-serif;min-height:26px;word-break:break-word}
+  .ic-box.on{border-color:var(--accent);background:rgba(var(--accent-rgb),.16)}
+  .ic-box.a.on{border-color:var(--c-plan);background:rgba(var(--c-plan-rgb),.16)}
+  .ic-box.d.on{border-color:var(--c-ana);background:rgba(var(--c-ana-rgb),.16)}
+  .ic-box.c.on{border-color:var(--c-des);background:rgba(var(--c-des-rgb),.16)}
+  .ic-mem{width:100%;border-collapse:separate;border-spacing:0;direction:ltr;margin:6px 0 12px;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:15px}
+  .ic-mem th,.ic-mem td{padding:6px 12px;border-bottom:1px solid var(--line);text-align:left}
+  .ic-mem tr:last-child td{border-bottom:0}
+  .ic-mem tr.on td{background:rgba(var(--c-plan-rgb),.2);font-weight:700}
+  .ic-mem th{background:var(--card2);color:var(--muted);font-weight:600}
+  .ctrl{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .dots{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0;direction:ltr}
+  .dots i{width:16px;height:7px;border-radius:99px;background:var(--line);transition:.2s}
+  .dots i.f{background:rgba(var(--c-f-rgb),.55)} .dots i.dc{background:rgba(var(--c-dc-rgb),.55)} .dots i.ex{background:rgba(var(--c-ex-rgb),.55)}
+  .dots i.now{outline:2px solid var(--text);outline-offset:1px}
+  /* timing */
+  .sg-clk{fill:none;stroke:var(--muted);stroke-width:2.2}
+  .sg-a{fill:rgba(var(--c-plan-rgb),.2);stroke:var(--c-plan);stroke-width:2.4}
+  .sg-d{fill:rgba(var(--c-ana-rgb),.2);stroke:var(--c-ana);stroke-width:2.4}
+  .sg-c{fill:none;stroke:var(--c-des);stroke-width:2.6}
+  .sg-idle{fill:none;stroke:var(--muted);stroke-width:1.6;stroke-dasharray:4 4;opacity:.7}
+  .sg-ghost{opacity:.18}
+  .sg-grid{stroke:var(--line);stroke-width:1.2;stroke-dasharray:3 5}
+  .sg-cur{stroke:var(--accent);stroke-width:2.4;stroke-dasharray:6 4}
+  .who{display:inline-block;padding:2px 12px;border-radius:99px;font:700 14px "Segoe UI",sans-serif;background:rgba(var(--accent-rgb),.18);border:1px solid rgba(var(--accent-rgb),.5);margin-inline-end:8px;direction:ltr}
+  /* memory chip */
+  .mrow{display:flex;align-items:center;gap:4px;padding:3px 6px;border-radius:10px;border:1px solid transparent;cursor:pointer;direction:ltr;width:max-content;max-width:100%}
+  .mrow .maddr{font:700 13px "Segoe UI",sans-serif;color:var(--muted);width:44px;text-align:right;margin-inline-end:4px}
+  .mrow .wl{width:34px;height:4px;border-radius:99px;background:var(--line);margin-inline-end:4px;transition:.2s}
+  .cell{width:26px;height:26px;display:grid;place-items:center;border-radius:6px;background:var(--card2);border:1px solid var(--line);font:700 13px "Segoe UI",sans-serif}
+  .mrow.on{border-color:var(--c-ana);background:rgba(var(--c-ana-rgb),.14)}
+  .mrow.on .wl{background:var(--c-ana)}
+  .mrow.on .cell{border-color:var(--c-ana)}
+  .mrow.on .maddr{color:var(--c-ana)}
+  .abits{display:flex;gap:6px;direction:ltr;flex-wrap:wrap;align-items:center;margin:6px 0 10px}
+  .abits button{min-width:62px;padding:6px 10px;border-radius:12px;border:1.5px solid var(--c-plan);background:rgba(var(--c-plan-rgb),.14);color:var(--text);font:700 15px "Segoe UI",sans-serif;cursor:pointer}
+  .abits button b{display:block;font-size:20px;line-height:1.2}
+  .abits button small{display:block;color:var(--muted);font-size:11.5px}
+  .tag{display:inline-block;font:700 12.5px "Segoe UI",sans-serif;padding:1px 9px;border-radius:99px;background:rgba(var(--warn-rgb),.18);border:1px solid rgba(var(--warn-rgb),.55);margin-inline-start:6px;vertical-align:middle;direction:ltr}
+  @media (max-width:700px){.fig svg text{font-size:16px}.fig svg text.sm{font-size:13.5px}.cell{width:22px;height:22px;font-size:12px}.mrow .wl{width:20px}}
+</style>
+</head>
+<body data-lecture="l1">
+
+<header class="topbar">
+  <a class="home" href="index.html" title="القائمة الرئيسية">🏠</a>
+  <div class="ttl"><b>CS202 · Lecture 1</b><small class="en plain">Intro to Computer Architecture &amp; Organization</small></div>
+  <div class="prog"><div class="bar"><i id="progBar"></i></div><span id="progTxt">0/11</span></div>
+  <button id="themeBtn" class="icon-btn" type="button" title="فاتح / داكن">☀️</button>
+</header>
+
+<div class="layout">
+<nav class="nav" id="nav" aria-label="محطات المحاضرة"></nav>
+<main>
+
+<!-- =====================================================  0 · BIG PICTURE -->
+<section class="station" data-icon="🗺️" data-title="الصورة الكبيرة">
+  <h2>الصورة الكبيرة 🗺️</h2>
+  <p class="lead">قبل أي تفاصيل: الكمبيوتر بيشتغل إزاي من جوه؟ تخيّله <b>مطعم</b> 🍽️ — اقلب كل كارت وشوف الجزء ده بيقابل إيه في الكمبيوتر.</p>
+
+  <div class="grid g4">
+    <div class="flip"><div class="f"><span class="emo">🚪</span><b>الزبون اللي بيدخّل الأوردر</b></div><div class="b"><b class="en">Input Unit</b><br>بياخد الـ <span class="en">program</span> والـ <span class="en">data</span> من المستخدم ويدخّلهم.</div></div>
+    <div class="flip"><div class="f"><span class="emo">🗄️</span><b>ورقة الأوردر + المكونات على الرف</b></div><div class="b"><b class="en">Memory</b><br>بيخزّن البرنامج (الـ instructions) والبيانات.</div></div>
+    <div class="flip"><div class="f"><span class="emo">👨‍🍳</span><b>الشيف المنسّق</b></div><div class="b"><b class="en">Control Unit</b><br>بيقرا الأوردر ويقول لكل حد يعمل إيه (<span class="en">control signals</span>).</div></div>
+    <div class="flip"><div class="f"><span class="emo">🔪</span><b>الأدوات والفرن</b></div><div class="b"><b class="en">ALU</b><br>بيعمل الحسابات والعمليات المنطقية (جمع، <span class="en">AND</span>...).</div></div>
+    <div class="flip"><div class="f"><span class="emo">🍽️</span><b>الطبق قدام الشيف</b></div><div class="b"><b class="en">Registers</b><br>خانات صغيرة جداً وسريعة جوه الـ <span class="en">CPU</span>.</div></div>
+    <div class="flip"><div class="f"><span class="emo">🛗</span><b>الممرات بين أجزاء المطبخ</b></div><div class="b"><b class="en">System Bus</b><br>الطرق اللي بتوصّل <span class="en">CPU</span> بالذاكرة والـ <span class="en">I/O</span>.</div></div>
+    <div class="flip"><div class="f"><span class="emo">🏬</span><b>المخزن الكبير بره المطبخ</b></div><div class="b"><b class="en">Auxiliary Storage</b><br>بيكمّل الذاكرة الرئيسية (<span class="en">Backing Storage</span>).</div></div>
+    <div class="flip"><div class="f"><span class="emo">🛎️</span><b>تسليم الطبق للزبون</b></div><div class="b"><b class="en">Output Unit</b><br>بيوصّل النتيجة (<span class="en">Result</span>) للمستخدم.</div></div>
+  </div>
+
+  <h3 class="sec">خريطة المحاضرة <small>(اضغط على أي مربع تروحله)</small></h3>
+  <div class="grid g3">
+    <button type="button" class="tile ph-imp" data-go="2"><span class="emo">🧱</span><b>مكونات الكمبيوتر</b><small>Input · Memory · CPU · Output</small></button>
+    <button type="button" class="tile ph-plan" data-go="3"><span class="emo">🚌</span><b class="en">System Bus</b><small>Address · Data · Control ⭐</small></button>
+    <button type="button" class="tile ph-f" data-go="4"><span class="emo">🔄</span><b class="en">Instruction Cycle</b><small>Fetch · Decode · Execute ⭐</small></button>
+    <button type="button" class="tile ph-des" data-go="5"><span class="emo">⏱️</span><b class="en">READ / WRITE Timing</b><small>رسم الـ clock والـ signals ⭐</small></button>
+    <button type="button" class="tile ph-ana" data-go="6"><span class="emo">🧠</span><b>الـ CPU من جوه</b><small>Registers · ALU · Control Unit</small></button>
+    <button type="button" class="tile ph-ex" data-go="7"><span class="emo">🧮</span><b>شريحة الذاكرة</b><small>Memory subsystem &amp; chip organization</small></button>
+  </div>
+
+  <div class="note">📌 <b>الامتحان:</b> الإثنين ٩ نوفمبر الساعة ٢:٣٠ م — على <b>أول محاضرتين بس</b>: <span class="en">10 MCQ</span> + <span class="en">5 True/False</span> + <span class="en">1 Essay</span> (٥ درجات) = ٢٠ درجة. والمذاكرة على ملفات المحاضرات اللي على الـ <span class="en">Google Drive</span> (مفيش كتاب مرجع اتحدد).</div>
+  <div class="note ok">💡 <b>طريقة المذاكرة هنا:</b> اقرا الشرح، العب بالرسومات (اضغط وحرّك)، وبعدين جاوب الألعاب. لو غلطت ارجع للمحطة من القائمة اللي على الجنب. لازم تعدّي على <b>محطات ٣ و ٤ و ٥</b> كويس — هم قلب المحاضرة.</div>
+  <div class="note warn">🧠 <b>فهم عام (مش في السلايدات):</b> في العادة <span class="en">Computer Architecture</span> = الحاجات اللي المبرمج بيشوفها (زي الـ <span class="en">instruction set</span> والـ <span class="en">registers</span>)، و<span class="en">Computer Organization</span> = إزاي الحاجات دي اتنفذت فعلياً (الـ <span class="en">control signals</span> والـ <span class="en">buses</span> والذاكرة). السلايدات نفسها ماعرّفتش الفرق، فمتحفظوش حرفياً.</div>
+
+  <div class="card">
+    <h3>🎯 بعد المحاضرة دي هتبقى قادر:</h3>
+    <ol class="steps ph-imp">
+      <li>تسمّي مكونات الكمبيوتر وتشرح مسار البيانات والـ <span class="en">control signals</span> بينهم.</li>
+      <li>تفرّق بين <span class="en">Address bus</span> و <span class="en">Data bus</span> و <span class="en">Control bus</span>.</li>
+      <li>تشرح الـ <span class="en">Instruction cycle</span> (<span class="en">Fetch → Decode → Execute</span>).</li>
+      <li>تقرا رسم الـ <span class="en">timing diagram</span> للـ <span class="en">memory read</span> و<span class="en">memory write</span> وتشرحه.</li>
+      <li>تشرح تنظيم الـ <span class="en">CPU</span> (<span class="en">registers, ALU, control unit</span>) وتنظيم شريحة الذاكرة.</li>
+    </ol>
+    <p class="hint">النقط دي من تلخيصي للسلايدات — الملف مفيهوش قائمة <span class="en">Learning Outcomes</span> رسمية.</p>
+  </div>
+</section>
+
+<!-- =====================================================  1 · COMPONENTS -->
+<section class="station" data-icon="🧱" data-title="مكونات الكمبيوتر">
+  <h2>مكونات الكمبيوتر 🧱 <span class="en plain" style="font-size:18px">Generic computer organization</span></h2>
+  <p class="lead">دي الصورة اللي في السلايدات. <b>اضغط على أي مربع</b> تشوف وظيفته، وبعدين دوس «اتبع الطريق» وشوف البرنامج والبيانات بيمشوا إزاي.</p>
+
+  <div class="card">
+    <div class="fig">
+      <svg id="orgSvg" viewBox="0 0 660 415" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Generic computer organization">
+        <defs>
+          <marker id="mkD" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk d"/></marker>
+          <marker id="mkC" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk c"/></marker>
+        </defs>
+        <!-- processor container first (so lines draw over it) -->
+        <g data-part="cpu" tabindex="0" role="button" aria-label="Processor"><rect class="blk cpu" x="120" y="215" width="420" height="180" rx="14"/></g>
+        <!-- data path -->
+        <path id="l-in" class="ln d" d="M102 125H205" marker-end="url(#mkD)"/>
+        <path id="l-out" class="ln d" d="M455 125H558" marker-end="url(#mkD)"/>
+        <path id="l-aux" class="ln d" d="M330 95V58" marker-start="url(#mkD)" marker-end="url(#mkD)"/>
+        <path id="l-instr" class="ln d" d="M225 149V240" marker-end="url(#mkD)"/>
+        <path id="l-operand" class="ln d" d="M385 149V240" marker-end="url(#mkD)"/>
+        <path id="l-result" class="ln d" d="M440 240V149" marker-end="url(#mkD)"/>
+        <path id="l-cualu" class="ln d" d="M310 270H350" marker-start="url(#mkD)" marker-end="url(#mkD)"/>
+        <!-- control signals -->
+        <path id="c-mem" class="ln c" d="M300 240V149" marker-end="url(#mkC)"/>
+        <path id="c-alu" class="ln c" d="M310 298H350" marker-end="url(#mkC)"/>
+        <path id="c-in" class="ln c" d="M140 262H57V222" marker-end="url(#mkC)"/>
+        <path id="c-out" class="ln c" d="M140 305H130V404H603V222" marker-end="url(#mkC)"/>
+        <path id="c-aux" class="ln c" d="M150 240V33H190" marker-end="url(#mkC)"/>
+        <!-- boxes -->
+        <g data-part="aux" tabindex="0" role="button" aria-label="Auxiliary Storage"><rect class="blk" x="190" y="8" width="280" height="50" rx="10"/><text x="330" y="30" text-anchor="middle">Auxiliary Storage</text><text x="330" y="48" text-anchor="middle" class="sm">(Backing Storage)</text></g>
+        <g data-part="memory" tabindex="0" role="button" aria-label="Memory"><rect class="blk" x="205" y="95" width="250" height="54" rx="10"/><text x="330" y="128" text-anchor="middle">Memory</text></g>
+        <g data-part="input" tabindex="0" role="button" aria-label="Input Unit"><rect class="blk" x="12" y="110" width="90" height="110" rx="10"/><text x="57" y="162" text-anchor="middle">Input</text><text x="57" y="181" text-anchor="middle">Unit</text></g>
+        <g data-part="output" tabindex="0" role="button" aria-label="Output Unit"><rect class="blk" x="558" y="110" width="90" height="110" rx="10"/><text x="603" y="162" text-anchor="middle">Output</text><text x="603" y="181" text-anchor="middle">Unit</text></g>
+        <g data-part="cu" tabindex="0" role="button" aria-label="Control Unit"><rect class="blk" x="140" y="240" width="170" height="80" rx="10"/><text x="225" y="285" text-anchor="middle">Control Unit</text></g>
+        <g data-part="alu" tabindex="0" role="button" aria-label="ALU"><rect class="blk" x="350" y="240" width="170" height="80" rx="10"/><text x="435" y="285" text-anchor="middle">ALU</text></g>
+        <g data-part="reg" tabindex="0" role="button" aria-label="Registers"><rect class="blk" x="140" y="335" width="380" height="30" rx="8"/><text x="330" y="356" text-anchor="middle">Registers</text></g>
+        <text x="330" y="384" text-anchor="middle" class="sm">Processor</text>
+        <!-- line labels -->
+        <text x="219" y="200" text-anchor="end" class="sm">Instruction</text>
+        <text x="306" y="172" class="sm">Read/Write</text>
+        <text x="379" y="212" text-anchor="end" class="sm">Operand</text>
+        <text x="446" y="212" class="sm">Result</text>
+        <text x="160" y="88" class="sm">From User</text>
+        <text x="482" y="116" class="sm">To User</text>
+      </svg>
+    </div>
+    <div class="legend"><span><i></i>Data path (مسار البيانات)</span><span><i class="c"></i>Control signals (إشارات التحكم)</span></div>
+    <div class="note" id="orgInfo" aria-live="polite">👆 اضغط على أي مربع في الرسمة.</div>
+    <div class="ctrl">
+      <button type="button" class="btn primary" id="orgNext">▶ اتبع الطريق</button>
+      <button type="button" class="btn" id="orgReset">↺ من الأول</button>
+    </div>
+  </div>
+
+  <h3 class="sec">الفكرة في سطرين</h3>
+  <div class="card">
+    <ul>
+      <li><b>الـ Data path</b> (الخط المتصل): بيانات وبرامج بتتنقل. <b>الـ Control signals</b> (الخط المنقّط): أوامر من الـ <span class="en">Control Unit</span> بتقول «اقرا / اكتب / اجمع / shift».</li>
+      <li>البرنامج نفسه (<span class="en">instructions</span>) والبيانات (<span class="en">operands</span>) <b>الاتنين بيتخزنوا في الـ Memory</b> — وده اللي بيخلّي الـ <span class="en">Control Unit</span> يجيب الـ instruction من الذاكرة (<span class="en">Instruction</span> في الرسمة).</li>
+      <li>الـ <span class="en">Processor</span> = <span class="en">Control Unit + ALU + Registers</span> (المربع المنقّط الكبير).</li>
+      <li>الـ <span class="en">Auxiliary (Backing) Storage</span> مش بديل للذاكرة — دوره <b class="en">to supplement main storage</b> (يكمّلها).</li>
+    </ul>
+  </div>
+
+  <h3 class="sec">🎯 لعبة: الجزء ده اسمه إيه؟</h3>
+  <div data-deck="parts"></div>
+</section>
+
+<!-- =====================================================  2 · SYSTEM BUS -->
+<section class="station" data-icon="🚌" data-title="الـ System Bus ⭐">
+  <h2>الـ <span class="en">System Bus</span> 🚌</h2>
+  <p class="lead">الـ bus = <b>طريق مشترك</b> بين الـ <span class="en">CPU</span> والذاكرة والـ <span class="en">I/O</span>. فيه <b>٣ طرق</b> بتتعمل بيهم كل حاجة: <b class="en">Address · Data · Control</b>.</p>
+
+  <div class="card">
+    <div class="fig">
+      <svg id="busSvg" viewBox="0 0 660 305" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="System bus">
+        <defs>
+          <marker id="mA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk a"/></marker>
+          <marker id="mDd" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk dd"/></marker>
+          <marker id="mCc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="mk cc"/></marker>
+        </defs>
+        <path class="tap a" d="M285 60V248"/><path class="tap d" d="M330 115V248"/><path class="tap c" d="M375 170V248"/>
+        <rect class="blk" x="10" y="20" width="110" height="190" rx="12" style="cursor:default"/><text x="65" y="120" text-anchor="middle">CPU</text>
+        <rect class="blk" x="540" y="20" width="110" height="190" rx="12" style="cursor:default"/><text x="595" y="120" text-anchor="middle">Memory</text>
+        <rect class="blk" x="235" y="248" width="190" height="46" rx="12" style="cursor:default"/><text x="330" y="277" text-anchor="middle">I/O Devices</text>
+        <path id="busA" class="bus a" d="M124 60H536" marker-end="url(#mA)"/>
+        <path id="busD" class="bus d" d="M124 115H536" marker-start="url(#mDd)" marker-end="url(#mDd)"/>
+        <path id="busC" class="bus c" d="M124 170H536" marker-start="url(#mCc)" marker-end="url(#mCc)"/>
+        <circle cx="285" cy="60" r="4.5" fill="var(--c-plan)"/><circle cx="330" cy="115" r="4.5" fill="var(--c-ana)"/><circle cx="375" cy="170" r="4.5" fill="var(--c-des)"/>
+        <text x="400" y="48" class="lbl-a">Address Bus</text>
+        <text x="400" y="103" class="lbl-d">Data Bus</text>
+        <text x="400" y="158" class="lbl-c">Control Bus</text>
+        <g id="busDots"></g>
+      </svg>
+    </div>
+    <div class="ctrl">
+      <button type="button" class="btn primary" id="busRead">▶ شغّل Memory READ</button>
+      <button type="button" class="btn" id="busWrite">▶ شغّل Memory WRITE</button>
+    </div>
+    <ol class="steplog" id="busLog"></ol>
+    <p class="hint">النقط الملونة بتمشي على الـ bus المناسب — لاحظ اتجاه كل واحدة، خصوصاً الـ <b>data</b> في الـ READ (راجعة للـ CPU) وفي الـ WRITE (رايحة للذاكرة).</p>
+  </div>
+
+  <h3 class="sec">كل <span class="en">bus</span> لوحده <small>(اضغط على التابات)</small></h3>
+  <div class="card" data-tabs="a" id="busTabs">
+    <div class="seg">
+      <button type="button" class="ph-plan" data-tab="a">Address bus</button>
+      <button type="button" class="ph-ana" data-tab="d">Data bus</button>
+      <button type="button" class="ph-des" data-tab="c">Control bus</button>
+    </div>
+    <div class="pane" data-pane="a">
+      <div class="bigq"><span class="chip en ph-plan">WHERE?</span><span class="chip en ph-plan">One-directional → CPU to memory</span></div>
+      <p>الـ <span class="en">CPU</span> لما يقرا <b>أو</b> يكتب في الذاكرة لازم الأول <b>يحدد العنوان</b> (<span class="en">address</span>) بتاع المكان اللي عايزه — والعنوان ده بيتحط على الـ <b class="en">address bus</b>. وبرضه لما الـ software تعوز تتعامل مع <span class="en">I/O device</span> بتحط عنوانه عليه.</p>
+      <p class="muted">🔹 السلايدة بتوصفه بإنه «<span class="en">the uppermost bus</span>» (الأعلى في الرسمة). 🔹 اتجاهه <b>واحد فقط</b> من الـ CPU للذاكرة — ده من <b>Lecture 2</b> (السلايدات الأولى مابتنصش على الاتجاه).</p>
+      <div class="note">🏠 <b>تشبيه:</b> عنوان العمارة والشقة — بيقولك «روح فين»، مش بيشيل حاجة.</div>
+    </div>
+    <div class="pane" data-pane="d">
+      <div class="bigq"><span class="chip en ph-ana">WHAT?</span><span class="chip en ph-ana">Bi-directional</span></div>
+      <p>الـ <b class="en">data bus</b> هو اللي <b>بينقل البيانات فعلاً</b> بين المكونات (<span class="en">CPU ↔ memory ↔ I/O</span>). لما الـ CPU يعمل <span class="en">fetch</span>: بيطلّع العنوان على الـ address bus، وبعدين الذاكرة بتطلّع الـ <span class="en">data</span> على الـ data bus.</p>
+      <p class="muted">🔹 بيشتغل في <b>الاتجاهين</b> (البيانات بتروح للذاكرة وبترجع منها) — وده معنى «<span class="en">bi-directional relationship</span>» في السلايدة.</p>
+      <div class="note">📦 <b>تشبيه:</b> شاحنة نقل — بتشيل المحتوى نفسه رايح وجاي.</div>
+    </div>
+    <div class="pane" data-pane="c">
+      <div class="bigq"><span class="chip en ph-des">HOW?</span><span class="chip en ph-des">READ · WRITE · IO/M ...</span></div>
+      <p>الـ <b class="en">control bus</b> بيشيل <b>مجموعة إشارات تحكم</b> (<span class="en">a collection of individual control signals</span>) بتقول إذا كانت البيانات هتتقرا <b>للـ CPU</b> ولا هتتكتب <b>بره الـ CPU</b>. السلايدة بتوصفه بإنه «<span class="en">eclectic collection of signals</span>» بتتحكم في طريقة تواصل المعالج مع باقي النظام.</p>
+      <p class="muted">🔹 خطوط <b class="en">READ</b> و <b class="en">WRITE</b> هي اللي بتحدد <b>اتجاه</b> الـ data على الـ data bus.</p>
+      <div class="note">🚦 <b>تشبيه:</b> إشارة المرور — بتقول «اقرا» أو «اكتب» والباقي بيمشي على حسبها.</div>
+    </div>
+  </div>
+
+  <h3 class="sec">جدول الحفظ</h3>
+  <table class="tbl">
+    <tr><th>الـ Bus</th><th>بيشيل إيه؟</th><th>الاتجاه</th></tr>
+    <tr class="ph-plan"><td><span class="dot"></span><span class="en">Address bus</span></td><td>عنوان الـ location (ذاكرة أو <span class="en">I/O</span>) اللي الـ CPU عايز يوصله</td><td>من CPU للذاكرة <span class="muted">(Lecture 2)</span></td></tr>
+    <tr class="ph-ana"><td><span class="dot"></span><span class="en">Data bus</span></td><td>البيانات (والـ instructions) نفسها</td><td>الاتجاهين</td></tr>
+    <tr class="ph-des"><td><span class="dot"></span><span class="en">Control bus</span></td><td>إشارات التحكم: <span class="en">READ / WRITE / IO/M</span></td><td>relationship ثنائي الاتجاه <span class="muted">(السلايدة)</span></td></tr>
+  </table>
+  <div class="note ok">💡 <b>جملة لازم تحفظها:</b> «<span class="en">Both processor and memory units hold a bi-directional relationship with the control and data bus.</span>»</div>
+  <div class="note warn">📎 <b>ملحوظة من Lecture 2:</b> عدد خطوط الـ address bus (<span class="en">n</span>) هو اللي بيحدد حجم الذاكرة: <span class="en">2<sup>n</sup></span> locations. هنحسبها بإيدك في محطة «شريحة الذاكرة».</div>
+
+  <h3 class="sec">🎯 لعبة: ده أنهي <span class="en">bus</span>؟</h3>
+  <div data-deck="buses"></div>
+</section>
+
+<!-- =====================================================  3 · INSTRUCTION CYCLE -->
+<section class="station" data-icon="🔄" data-title="Instruction Cycle ⭐">
+  <h2><span class="en">Instruction Cycle</span> 🔄</h2>
+  <p class="lead">الـ instruction cycle = الإجراء اللي الـ <span class="en">microprocessor</span> بيعدّي بيه عشان يعالج <b>instruction واحدة</b>. <b>٣ phases</b> — اضغط على كل واحدة.</p>
+
+  <div data-tabs="f">
+    <div class="path" style="grid-template-columns:repeat(3,1fr)">
+      <button type="button" class="node ph-f" data-tab="f"><i>1</i><b>Fetch</b><small>اجيب الـ instruction</small></button>
+      <button type="button" class="node ph-dc" data-tab="dc"><i>2</i><b>Decode</b><small>افهمها</small></button>
+      <button type="button" class="node ph-ex" data-tab="ex"><i>3</i><b>Execute</b><small>نفّذها</small></button>
+    </div>
+    <div class="pane panel ph-f" data-pane="f">
+      <div class="ph-head"><span class="q">Fetch</span><span>الـ processor بيجيب (<span class="en">fetches / reads</span>) الـ instruction من الذاكرة</span></div>
+      <ol class="steps">
+        <li>الـ processor <b>أولاً</b> بيطلّع <b>عنوان الـ instruction</b> على الـ <span class="en">address bus</span> — وعنده <span class="en">register</span> اسمه <b class="en">Program Counter</b>.</li>
+        <li>بيفعّل إشارة <b class="en">READ</b> والذاكرة بتحط كود الـ instruction على الـ <span class="en">data bus</span>.</li>
+        <li>في آخر الـ fetch الـ CPU بيقرا الكود من الـ data bus ويخزّنه في <span class="en">internal register</span> اسمه عادةً <b class="en">Instruction Register</b>.</li>
+      </ol>
+    </div>
+    <div class="pane panel ph-dc" data-pane="dc">
+      <div class="ph-head"><span class="q">Decode</span><span>بيحدد أنهي instruction هو جابها</span></div>
+      <p>السلايدة بتقول بالحرف: «<span class="en">it decodes the instruction determining which instruction it has fetched</span>». يعني الـ decode = <b>فهم الـ instruction</b> (إيه هي: جمع؟ تخزين؟...) <b>من غير ما تنفّذها</b> لسه.</p>
+      <div class="note warn">⚠️ فخ شائع: الـ <span class="en">Decode</span> <b>مش</b> بتنفّذ العملية. التنفيذ في الـ <span class="en">Execute</span>.</div>
+    </div>
+    <div class="pane panel ph-ex" data-pane="ex">
+      <div class="ph-head"><span class="q">Execute</span><span>بينفّذ العمليات المطلوبة للـ instruction</span></div>
+      <ol class="steps">
+        <li>بيعمل <b>عملية داخلية</b> (<span class="en">internally</span>) — زي الجمع في الـ <span class="en">ALU</span>.</li>
+        <li>وبيدّي الذاكرة والـ I/O الـ <b class="en">address, data &amp; control signals</b> اللي محتاجينها عشان ينفّذوا الـ instruction.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3 class="sec">🔬 جرّب بنفسك: شغّل برنامج صغير خطوة خطوة</h3>
+  <p class="muted">⚠️ البرنامج ده <b>مثال توضيحي من عندي</b> (مش في السلايدات) — الهدف تشوف الـ <span class="en">PC</span> والـ <span class="en">IR</span> والـ buses وهما بيتحركوا.</p>
+  <div class="card" id="icCard">
+    <div class="ic-badge" id="icPhase">Ready</div>
+    <div class="ic-grid">
+      <div class="ic-box" id="icPCb"><small>Program Counter (PC)</small><b id="icPC">100</b></div>
+      <div class="ic-box" id="icIRb"><small>Instruction Register (IR)</small><b id="icIR">—</b></div>
+      <div class="ic-box a" id="icABb"><small>Address bus</small><b id="icAB">—</b></div>
+      <div class="ic-box d" id="icDBb"><small>Data bus</small><b id="icDB">—</b></div>
+      <div class="ic-box c" id="icCBb"><small>Control bus</small><b id="icCB">—</b></div>
+    </div>
+    <table class="ic-mem"><tr><th>Address</th><th>Memory content</th></tr>
+      <tr id="icM100"><td>100</td><td>ADD R1, R2</td></tr>
+      <tr id="icM101"><td>101</td><td>STORE R1 → [200]</td></tr>
+      <tr id="icM200"><td>200</td><td id="icM200v">—</td></tr>
+    </table>
+    <div class="dots" id="icDots"></div>
+    <div class="note caption" id="icCap"></div>
+    <div class="ctrl">
+      <button type="button" class="btn" id="icBack">→ رجوع</button>
+      <button type="button" class="btn primary" id="icNext">الخطوة الجاية ←</button>
+      <button type="button" class="btn" id="icAuto">⏵ تلقائي</button>
+      <button type="button" class="btn ghost" id="icReset">↺ من الأول</button>
+    </div>
+  </div>
+
+  <h3 class="sec">🎯 لعبة: الخطوة دي في أنهي <span class="en">phase</span>؟</h3>
+  <div data-deck="cycle"></div>
+</section>
+
+<!-- =====================================================  4 · TIMING -->
+<section class="station" data-icon="⏱️" data-title="READ / WRITE Timing ⭐">
+  <h2><span class="en">READ / WRITE Timing</span> ⏱️</h2>
+  <p class="lead">الـ <span class="en">timing diagram</span> بيوريك <b>مين بيعمل إيه ومتى</b> على مدار الـ <span class="en">clock cycles</span>. حرّك الخطوات وشوف الإشارات بتظهر.</p>
+
+  <div class="note">🧩 <b>الإشارات الأساسية:</b> <b class="en">READ</b> = إشارة على الـ control bus بيفعّلها الـ microprocessor لما يكون جاهز يقرا من الذاكرة أو الـ I/O؛ لما تتفعّل الذاكرة بتحط الكود على الـ data bus والـ microprocessor بياخده ويخزّنه في register. <b class="en">WRITE</b> = نفس الفكرة بس للتخزين (<span class="en">WRITE operation causes the memory to store the data</span>).</div>
+
+  <div class="card" id="tmCard">
+    <div class="seg ph-des" id="tmMode">
+      <button type="button" data-m="read" class="on">Memory READ (fig a)</button>
+      <button type="button" data-m="write">Memory WRITE (fig b)</button>
+    </div>
+    <div class="fig"><svg id="tmSvg" viewBox="0 0 640 262" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Timing diagram"></svg></div>
+    <div class="note caption" id="tmCap" aria-live="polite"></div>
+    <div class="ctrl">
+      <button type="button" class="btn" id="tmBack">→ رجوع</button>
+      <button type="button" class="btn primary" id="tmNext">الخطوة الجاية ←</button>
+      <button type="button" class="btn ghost" id="tmReset">↺ من الأول</button>
+    </div>
+  </div>
+
+  <h3 class="sec">الفرق بين <span class="en">READ</span> و <span class="en">WRITE</span> في سطور</h3>
+  <table class="tbl">
+    <tr><th></th><th class="en">READ</th><th class="en">WRITE</th></tr>
+    <tr><td>أول clock cycle</td><td>الـ CPU بيحط <b>الـ address بس</b></td><td>الـ CPU بيحط <b>الـ address والـ data</b> مع بعض</td></tr>
+    <tr><td>الإشارة</td><td><span class="en">READ</span> (بعد cycle من الـ address)</td><td><span class="en">WRITE</span> (في الـ cycle التاني)</td></tr>
+    <tr><td>مين بيحط الـ data؟</td><td><b>الذاكرة</b>، والـ CPU بيقراها في register</td><td><b>الـ CPU</b>، والذاكرة بتخزّنها</td></tr>
+    <tr><td>في الآخر</td><td>الـ CPU يشيل الـ address ويلغي READ، وبعده الذاكرة تشيل الـ data</td><td>الـ CPU يشيل الـ address والـ data ويلغي WRITE</td></tr>
+  </table>
+
+  <div class="note warn">⚠️ <b>ملحوظة على صياغة السلايدة:</b> في الـ write، السلايدة بتقول «<span class="en">asserts the WRITE control signal at the end of the second clock cycle</span>» وبعدها بتقول إن في <b>آخر الـ second clock cycle</b> الـ processor بيشيل الـ address والـ data ويلغي WRITE. الرسمة (fig b) بتظهر WRITE <b>عالية طول الـ cycle التاني</b>. اللي تضمنه: <b>WRITE بتكون مفعّلة في الـ clock cycle التاني، وفي آخره كل حاجة بتتشال.</b> لو جملة الامتحان نسخت صياغة السلايدة، اتبع صياغتها.</div>
+  <div class="note">📝 <b>كلمتين مصطلحات:</b> <span class="en">assert</span> = فعّل الإشارة (خليها active). <span class="en">deassert</span> = ألغِ تفعيلها. (شرح عام للكلمتين).</div>
+
+  <h3 class="sec">🎯 تدريب: <span class="en">timing</span></h3>
+  <div data-deck="timing"></div>
+</section>
+
+<!-- =====================================================  5 · CPU -->
+<section class="station" data-icon="🧠" data-title="الـ CPU من جوه">
+  <h2>الـ <span class="en">CPU Organization</span> 🧠</h2>
+  <p class="lead">الـ <span class="en">CPU</span> هو العقل. اقلب الكروت وشوف كل جزء جواه بيعمل إيه.</p>
+
+  <div class="card">
+    <p><b class="en">Central Processing Unit (CPU)</b> = الدوائر الإلكترونية اللي جوه الكمبيوتر والتي <b>بتنفّذ instructions البرنامج</b> عن طريق العمليات الأساسية: <b class="en">arithmetic, logical, control and input/output (I/O)</b> operations.</p>
+    <p>كل المكونات الكبيرة متوصّلة ببعض بالـ <b class="en">system bus</b>: الـ <span class="en">data bus</span> بيتنقل عليه البيانات، والـ <span class="en">address bus</span> بيتحط عليه عنوان المكان اللي الـ software عايزاه (ذاكرة أو I/O)، والـ <span class="en">control bus</span> فيه الإشارات اللي بتحدد طريقة التواصل وبتتحكم في اتجاه الـ data.</p>
+  </div>
+
+  <div class="grid g3">
+    <div class="flip ph-imp"><div class="f"><span class="emo">🗂️</span><b class="en">Register section</b><small>القسم الأول</small></div><div class="b">مجموعة <span class="en">registers</span> + <span class="en">bus</span> أو أي وسيلة اتصال. الـ registers اللي في الـ <span class="en">instruction set architecture</span> موجودة هنا. الـ address bus والـ data bus بيتعاملوا مع القسم ده. وفيه كمان registers <b>المبرمج مابيقدرش يوصلها مباشرة</b>.</div></div>
+    <div class="flip ph-plan"><div class="f"><span class="emo">📍</span><b class="en">Program Counter</b><small>register</small></div><div class="b">جزء من الـ register section. في الـ fetch، الـ processor <b>بيطلّع عنوان الـ instruction</b> على الـ address bus — والـ <span class="en">PC</span> هو الـ register المسؤول عن ده.</div></div>
+    <div class="flip ph-ana"><div class="f"><span class="emo">📜</span><b class="en">Instruction Register</b><small>register</small></div><div class="b">في آخر الـ fetch الـ CPU بيقرا كود الـ instruction من الـ data bus <b>ويخزّنه</b> في <span class="en">internal register</span> اسمه عادةً <b class="en">instruction register</b>.</div></div>
+    <div class="flip ph-ana"><div class="f"><span class="emo">➕</span><b class="en">ALU</b><small>Arithmetic / Logic Unit</small></div><div class="b">بتنفّذ <b>أغلب العمليات الحسابية والمنطقية</b> زي الجمع والـ <span class="en">AND</span> (<span class="en">adding and ANDing values</span>).</div></div>
+    <div class="flip ph-des"><div class="f"><span class="emo">🎛️</span><b class="en">Control Unit</b><small>بتتحكم في الـ CPU</small></div><div class="b">بتستلم بعض القيم من الـ register unit وبتولّد منها <b>control signals</b>. وبتولّد كمان إشارات الـ <span class="en">system control bus</span> زي <b class="en">READ, WRITE, IO/M</b>.</div></div>
+    <div class="flip"><div class="f"><span class="emo">🔗</span><b>سلسلة التحكم</b><small>مين بيتحكم في مين؟</small></div><div class="b"><span class="en">The CPU controls the computer, the control unit controls the CPU.</span><br>الـ CPU بيتحكم في الكمبيوتر، والـ control unit بتتحكم في الـ CPU.</div></div>
+  </div>
+
+  <div class="note">🔎 <b>الرسمة اللي في السلايدة (CPU):</b> جوه <span class="en">The Microprocessor</span> فيه <span class="en">Control unit + Arithmetic logic unit + Registers</span>. والـ CPU بيتواصل مع <span class="en">Primary storage (main memory)</span> و<span class="en">Secondary storage</span> ومع الـ <span class="en">Input</span> والـ <span class="en">Output</span> والـ <span class="en">Communication devices</span>.</div>
+  <div class="note warn">⚠️ <b>فخ:</b> الإشارات <span class="en">READ / WRITE</span> بتطلع من الـ <b>Control Unit</b> مش من الـ ALU. والـ ALU شغلها العمليات بس.</div>
+  <div class="note warn">📎 <span class="en">IO/M</span>: نص السلايدة طالع «<span class="en">IO/</span>» ناقص الرمز (غالباً <span class="en">IO/M</span> = إشارة بتفرّق بين الوصول لـ I/O والوصول للذاكرة — ده فهم عام). المهم تعرف إنها إشارة بتولّدها الـ control unit.</div>
+
+  <h3 class="sec">🎯 لعبة: مين المسؤول؟</h3>
+  <div data-deck="cpu"></div>
+</section>
+
+<!-- =====================================================  6 · MEMORY CHIP -->
+<section class="station" data-icon="🧮" data-title="شريحة الذاكرة">
+  <h2>شريحة الذاكرة 🧮 <span class="en plain" style="font-size:18px">Memory subsystem &amp; chip organization</span></h2>
+  <p class="lead">الذاكرة بتتبني من <b>جدول (<span class="en">array</span>) من الخلايا</b>. جرّب بنفسك: اختار عنوان وشوف الـ <span class="en">word line</span> بتنوّر.</p>
+
+  <div class="card">
+    <ul>
+      <li><b class="en">Memory</b> = مجموعة دوائر بتخزّن بيانات.</li>
+      <li>لها عدد من الـ <b class="en">locations</b>، وكل <b class="en">word</b> بيخزّن قيمة <span class="en">binary</span> بطول <b>ثابت</b>.</li>
+      <li>عدد الـ locations وحجم كل location <b>بيختلف من شريحة لشريحة</b>، لكن <b>ثابت جوه الشريحة الواحدة</b>.</li>
+      <li>الذاكرة بتتنظّم كـ <b class="en">array</b>: <b>كل cell بتخزّن bit واحد</b>، و<b>كل row = memory word</b>.</li>
+      <li>خلايا الـ row الواحدة متوصّلة بخط مشترك اسمه <b class="en">word line</b>، بيحرّكه الـ <b class="en">address decoder</b> اللي على الشريحة.</li>
+    </ul>
+    <div class="note warn">⚠️ السلايدة كاتبة «<span class="en">common column called word line</span>» (column). الصح هندسياً إن الـ word line بتمر على <b>صف</b> واحد — الأمان في الامتحان: <b>كل row = word</b> والـ word line بيحرّكها الـ address decoder.</div>
+  </div>
+
+  <h3 class="sec">🔬 جرّب الـ <span class="en">address decoder</span></h3>
+  <div class="card calc" id="chipCard">
+    <div class="calc-top">
+      <label>عدد خطوط الـ address <span class="en">(n)</span>: <input type="range" id="chN" min="1" max="4" value="3"> <b class="en" id="chNv">3</b></label>
+      <div class="seg" id="chW" style="margin:0"><button type="button" data-w="4">word = 4 bits</button><button type="button" data-w="8" class="on">word = 8 bits</button></div>
+    </div>
+    <p class="muted" style="margin:6px 0">اضغط على أي bit من الـ address عشان تقلبه (0/1) <b>أو</b> اضغط على أي row:</p>
+    <div class="abits" id="chAddr"></div>
+    <div class="fig" style="overflow-x:auto"><div id="chGrid"></div></div>
+    <div class="res-row">
+      <div class="res"><small>Locations = 2ⁿ</small><b id="chLoc"></b></div>
+      <div class="res"><small>Bits per word</small><b id="chBits"></b></div>
+      <div class="res"><small>Total bits = locations × word</small><b id="chTot"></b></div>
+      <div class="res pos"><small>اللي بيطلع على الـ data bus</small><b id="chOut"></b></div>
+    </div>
+    <p class="hint">المحتوى اللي في الخلايا أرقام عشوائية للتوضيح بس.</p>
+  </div>
+
+  <h3 class="sec">🧮 حاسبة السعة <small>(بتتكرر في Lecture 2)</small></h3>
+  <div class="card calc" id="capCard">
+    <div class="calc-top">
+      <label>Address lines <span class="en">n</span> <input type="number" id="cpN" min="1" max="40" value="10"></label>
+      <label>Word size (bits) <input type="number" id="cpW" min="1" max="128" value="8"></label>
+    </div>
+    <div class="ctrl" style="margin:0 0 8px">
+      <button type="button" class="btn" data-p="10,8">1K × 8</button>
+      <button type="button" class="btn" data-p="16,16">64K × 16</button>
+      <button type="button" class="btn" data-p="20,8">1M × 8</button>
+      <button type="button" class="btn" data-p="32,8">4G × 8</button>
+    </div>
+    <div class="res-row">
+      <div class="res"><small>Locations (2ⁿ)</small><b id="cpLoc"></b></div>
+      <div class="res"><small>Total bits</small><b id="cpBits"></b></div>
+      <div class="res"><small>Total bytes</small><b id="cpBytes"></b></div>
+      <div class="res pos"><small>بشكل مقروء</small><b id="cpPretty"></b></div>
+    </div>
+    <p class="hint">الشريحة بتتوصف <span class="en">locations × word-size</span>. مثلاً <span class="en">1K × 8</span> = ١٠٢٤ location كل واحدة ٨ bits، يعني ١٠ address lines و٨ data lines (Lecture 2).</p>
+  </div>
+
+  <h3 class="sec">🎯 تدريب: شريحة الذاكرة</h3>
+  <div data-deck="chip"></div>
+</section>
+
+<!-- =====================================================  7 · TRAPS -->
+<section class="station" data-icon="⚠️" data-title="فخاخ الامتحان">
+  <h2>فخاخ الامتحان ⚠️</h2>
+  <p class="lead">الجمل دي هي نوع الصياغة اللي بيتعمل منها <span class="en">True/False</span>. قرر: صح ولا غلط؟ (الامتحان فيه ٥ <span class="en">T/F</span> بس — بس كل ما تتدرب أكتر أحسن.)</p>
+  <div data-deck="traps"></div>
+</section>
+
+<!-- =====================================================  8 · FLASHCARDS -->
+<section class="station" data-icon="🃏" data-title="Flashcards">
+  <h2>Flashcards 🃏</h2>
+  <p class="lead">فكّر في الإجابة الأول، وبعدين اقلب الكارت. علّم اللي عرفته ✅ واللي لسه 🔁 — وراجع الأخير بس.</p>
+  <div data-flash="main"></div>
+  <p class="hint" style="text-align:center;margin-top:10px">⌨️ مسطرة (Space) تقلب · الأسهم تنقل بين الكروت</p>
+</section>
+
+<!-- =====================================================  9 · QUIZ -->
+<section class="station" data-icon="📝" data-title="الكويز النهائي">
+  <h2>الكويز النهائي 📝</h2>
+  <p class="lead">١٠ أسئلة <span class="en">MCQ</span> بتصحيح فوري، وبعدها ٤ أسئلة <span class="en">Essay</span> تكتب إجابتك وتقارنها بالنموذجية. (في الامتحان سؤال مقالي واحد بـ ٥ درجات.)</p>
+
+  <h3 class="sec">① MCQ</h3>
+  <div data-deck="mcq"></div>
+
+  <h3 class="sec">② Essay</h3>
+  <div class="card essay" data-essay="e1">
+    <h3>سؤال 1</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">Explain the three buses of the system bus. State what each one carries and its direction.</p>
+    <textarea placeholder="اكتب إجابتك هنا (بتتحفظ في المتصفح بس)…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+  <div class="card essay" data-essay="e2">
+    <h3>سؤال 2</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">Describe the instruction cycle. Explain what happens in each of its phases, including the role of the program counter and the instruction register.</p>
+    <textarea placeholder="اكتب إجابتك هنا…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+  <div class="card essay" data-essay="e3">
+    <h3>سؤال 3</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">Using a timing diagram description, explain the memory read operation and state how the memory write operation differs from it.</p>
+    <textarea placeholder="اكتب إجابتك هنا…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+  <div class="card essay" data-essay="e4">
+    <h3>سؤال 4</h3>
+    <p dir="auto" class="en plain" style="font-weight:600">Describe the organization of the CPU (its main parts and what each one does) and the internal organization of a memory chip.</p>
+    <textarea placeholder="اكتب إجابتك هنا…"></textarea>
+    <button type="button" class="btn" data-show>📖 اعرض الإجابة النموذجية</button>
+    <div class="model" hidden><div class="mdl"></div><div class="pts"></div></div>
+  </div>
+</section>
+
+<!-- =====================================================  10 · SUMMARY -->
+<section class="station summary" data-icon="⚡" data-title="ملخص المراجعة">
+  <h2>ملخص المراجعة ⚡ <span class="en plain" style="font-size:18px">Lecture 1</span></h2>
+  <p class="lead noprint">ده اللي تراجعه الليلة اللي قبل الامتحان. <button type="button" class="btn" onclick="window.print()">🖨️ اطبع / احفظ PDF</button></p>
+
+  <h3 class="sec">🧱 المكونات</h3>
+  <table class="tbl">
+    <tr><th>الجزء</th><th>وظيفته</th></tr>
+    <tr><td class="en">Input Unit</td><td>بيدخّل الـ program والـ data من المستخدم للـ memory</td></tr>
+    <tr><td class="en">Memory</td><td>مجموعة دوائر لتخزين البيانات (instructions + operands + results)</td></tr>
+    <tr><td class="en">Control Unit</td><td>بيتحكم في الـ CPU وبيولّد الـ control signals (Read/Write، Add/Shift، IO/M)</td></tr>
+    <tr><td class="en">ALU</td><td>أغلب العمليات الحسابية والمنطقية (adding, ANDing)</td></tr>
+    <tr><td class="en">Registers</td><td>جزء من الـ Processor (بيحتوي PC و IR وغيرهم)</td></tr>
+    <tr><td class="en">Output Unit</td><td>بيوصّل الـ result للمستخدم</td></tr>
+    <tr><td class="en">Auxiliary Storage</td><td>Backing storage — to supplement main storage</td></tr>
+  </table>
+
+  <h3 class="sec">🚌 الـ System Bus</h3>
+  <table class="tbl">
+    <tr class="ph-plan"><td><span class="dot"></span><span class="en">Address</span></td><td>عنوان الـ location · اتجاه واحد CPU→Memory <span class="muted">(L2)</span> · «uppermost bus»</td></tr>
+    <tr class="ph-ana"><td><span class="dot"></span><span class="en">Data</span></td><td>البيانات نفسها · bi-directional</td></tr>
+    <tr class="ph-des"><td><span class="dot"></span><span class="en">Control</span></td><td>READ / WRITE / IO/M · بتحدد اتجاه الـ data</td></tr>
+  </table>
+
+  <h3 class="sec">🔄 الـ Instruction Cycle</h3>
+  <table class="tbl">
+    <tr class="ph-f"><td><span class="dot"></span><span class="en">Fetch</span></td><td>الـ PC يطلّع العنوان على address bus، READ، الذاكرة تحط الكود على data bus، يتخزن في <span class="en">IR</span></td></tr>
+    <tr class="ph-dc"><td><span class="dot"></span><span class="en">Decode</span></td><td>تحديد أنهي instruction اتجابت</td></tr>
+    <tr class="ph-ex"><td><span class="dot"></span><span class="en">Execute</span></td><td>عملية داخلية + توفير address و data و control signals للذاكرة والـ I/O</td></tr>
+  </table>
+
+  <h3 class="sec">⏱️ READ ضد WRITE</h3>
+  <table class="tbl">
+    <tr><th></th><th class="en">READ</th><th class="en">WRITE</th></tr>
+    <tr><td>الـ CPU يحط</td><td>Address</td><td>Address + Data</td></tr>
+    <tr><td>الإشارة</td><td>READ بعد cycle من الـ address</td><td>WRITE في الـ cycle التاني</td></tr>
+    <tr><td>مين على الـ data bus</td><td>الذاكرة</td><td>الـ CPU</td></tr>
+    <tr><td>النهاية</td><td>CPU يشيل address + READ، الذاكرة تشيل data</td><td>CPU يشيل address + data + WRITE</td></tr>
+  </table>
+
+  <h3 class="sec">🧮 شريحة الذاكرة</h3>
+  <div class="grid g2">
+    <div class="card"><h4>بنية</h4><p style="margin:0">array · <b>cell = 1 bit</b> · <b>row = memory word</b> · word line بيحرّكها الـ <span class="en">address decoder</span></p></div>
+    <div class="card"><h4>أرقام</h4><p style="margin:0"><span class="en">n</span> address lines بتدّي <span class="en">2<sup>n</sup></span> locations · <span class="en">1K × 8</span> = ١٠ address lines + ٨ data lines · locations وحجم الـ word ثابتين جوه الشريحة</p></div>
+  </div>
+
+  <h3 class="sec">🔍 نقط فيها اختلاف أو غموض بين السلايدات <small>(احسبها صح)</small></h3>
+  <table class="tbl">
+    <tr><th>الموضوع</th><th>الملاحظة</th></tr>
+    <tr><td>اتجاه الـ address bus</td><td>السلايدات مابتنصش — <span class="en">Lecture 2</span> بتقول <b>one-directional (CPU → memory)</b>.</td></tr>
+    <tr><td>الـ word line</td><td>السلايدة: «common <b>column</b>» — الأدق: خط مشترك لخلايا <b>الـ row</b>.</td></tr>
+    <tr><td>توقيت WRITE</td><td>صياغة السلايدة فيها لبس — الرسمة بتبيّن WRITE في الـ cycle التاني.</td></tr>
+    <tr><td>الـ PC بيزيد</td><td>مش مكتوبة في السلايدات (فهم عام) — المكتوب إن الـ PC هو اللي بيطلّع عنوان الـ instruction.</td></tr>
+    <tr><td>IO/M</td><td>النص طالع «IO/» — ماتحفظش غير إنها إشارة control مع READ/WRITE.</td></tr>
+  </table>
+
+  <h3 class="sec">⚠️ الفخاخ</h3>
+  <div class="note bad">
+    ❌ Address bus بينقل data (ده Data bus) &nbsp;·&nbsp; ❌ Instruction cycle = Fetch + Execute بس (هم 3) &nbsp;·&nbsp; ❌ Decode = تنفيذ (ده Execute) &nbsp;·&nbsp; ❌ في الـ READ الـ CPU هو اللي يحط الـ data (الذاكرة هي) &nbsp;·&nbsp; ❌ في الـ WRITE الـ CPU يحط address بس (address + data) &nbsp;·&nbsp; ❌ ALU تولّد READ/WRITE (Control Unit) &nbsp;·&nbsp; ❌ IR فيه عنوان الـ instruction (الكود نفسه) &nbsp;·&nbsp; ❌ cell = byte / column = word &nbsp;·&nbsp; ❌ Auxiliary storage بيحل محل الـ memory
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+window.DATA = {
+  decks: {
+    /* ---------- components ---------- */
+    parts: {
+      cols: 3, shuffleOpts: false,
+      opts: ['Input Unit', 'Memory', 'Output Unit', 'Control Unit', 'ALU', 'Auxiliary Storage'],
+      cards: [
+        { q: 'بيستقبل الـ <span class="en">Program and Data</span> من المستخدم ويدخّلهم للنظام', a: 0, why: 'ده الـ <b>Input Unit</b> — «From User (Program and Data)».' },
+        { q: 'بيخزّن الـ instructions والـ operands والنتائج', a: 1, why: 'الـ <b>Memory</b>: مجموعة دوائر لتخزين البيانات.' },
+        { q: 'بيوصّل الـ <span class="en">Result</span> للمستخدم', a: 2, why: 'الـ <b>Output Unit</b> — «To User (Result)».' },
+        { q: 'بيبعت إشارات <span class="en">Read / Write</span> للذاكرة و <span class="en">Add / Shift</span> للـ ALU', a: 3, why: 'دي <b>Control signals</b> بتطلع من الـ <b>Control Unit</b>.' },
+        { q: 'بينفّذ الجمع والـ <span class="en">AND</span> والعمليات الحسابية والمنطقية', a: 4, why: 'الـ <b>ALU</b>: بتنفّذ أغلب العمليات الحسابية والمنطقية.' },
+        { q: '«<span class="en">To supplement main storage</span>» — بيكمّل الذاكرة الرئيسية', a: 5, why: 'الـ <b>Auxiliary Storage</b> (اسمه التاني <span class="en">Backing Storage</span>).' },
+        { q: 'الـ <span class="en">Instruction</span> بتتبعت منه للـ Control Unit', a: 1, why: 'الـ instructions متخزنة في <b>Memory</b> وبتتجاب منها.' },
+        { q: 'بيستلم الـ <span class="en">Operand</span> من الذاكرة ويرجّع الـ <span class="en">Result</span>', a: 4, why: 'الـ <b>ALU</b> بتاخد الـ operands وبترجّع الـ result للذاكرة.' },
+        { q: 'اسمه التاني <span class="en">Backing Storage</span>', a: 5, why: 'الـ <b>Auxiliary Storage</b> = Backing Storage.' },
+        { q: 'بيدير باقي الأجزاء عن طريق الـ control signals', a: 3, why: 'ده شغل الـ <b>Control Unit</b>.' }
+      ]
+    },
+
+    /* ---------- buses ---------- */
+    buses: {
+      cols: 3,
+      opts: [{ t: 'Address bus', cls: 'ph-plan' }, { t: 'Data bus', cls: 'ph-ana' }, { t: 'Control bus', cls: 'ph-des' }],
+      cards: [
+        { q: 'الـ CPU بيحط عليه <b>عنوان</b> المكان اللي عايز يقرا منه أو يكتب فيه', a: 0, why: 'الـ CPU لازم <b>يحدد العنوان</b> قبل أي قراءة أو كتابة — ده الـ <b>Address bus</b>.' },
+        { q: 'بينقل البيانات نفسها بين الـ CPU والذاكرة والـ I/O', a: 1, why: 'ده <b>Data bus</b> — «used to shuffle data between the various components».' },
+        { q: 'بيشيل إشارات زي <span class="en">READ</span> و <span class="en">WRITE</span>', a: 2, why: 'دي <b>control signals</b> على الـ <b>Control bus</b>.' },
+        { q: 'اتجاهه واحد: من الـ CPU للذاكرة <span class="en">(حسب Lecture 2)</span>', a: 0, why: 'الـ <b>Address bus</b> one-directional (CPU → memory).' },
+        { q: 'بيشتغل في الاتجاهين: البيانات رايحة وجاية', a: 1, why: 'الـ <b>Data bus</b> bi-directional.' },
+        { q: 'بيحدد اتجاه نقل الـ data على الـ data bus (قراءة ولا كتابة)', a: 2, why: '«The read and write control lines control the direction of data on the data bus» — ده <b>Control bus</b>.' },
+        { q: 'الذاكرة بتطلّع عليه الـ data لما الـ CPU يعمل fetch', a: 1, why: 'الـ CPU يطلّع العنوان على الـ address bus، وبعدين الذاكرة تطلّع الـ data على الـ <b>Data bus</b>.' },
+        { q: 'الـ software بتحط عليه عنوان الـ memory location أو الـ I/O device اللي عايزاه', a: 0, why: 'ده <b>Address bus</b>.' },
+        { q: '«<span class="en">an eclectic collection of signals</span>» بتتحكم في طريقة تواصل المعالج مع باقي النظام', a: 2, why: 'الوصف ده في السلايدة بتاع <b>Control bus</b>.' },
+        { q: 'هو «<span class="en">the uppermost bus</span>» في رسمة السلايدة', a: 0, why: 'الـ <b>Address bus</b> هو الأعلى في الرسمة.' }
+      ]
+    },
+
+    /* ---------- instruction cycle ---------- */
+    cycle: {
+      cols: 3,
+      opts: [{ t: 'Fetch', cls: 'ph-f' }, { t: 'Decode', cls: 'ph-dc' }, { t: 'Execute', cls: 'ph-ex' }],
+      cards: [
+        { q: 'الـ processor بيقرا الـ instruction من الذاكرة', a: 0, why: '«First the processor <b>fetches</b> or reads the instruction from memory».' },
+        { q: 'الـ processor بيحدد أنهي instruction هو جابها', a: 1, why: '<b>Decode</b>: «determining which instruction it has fetched».' },
+        { q: 'بيعمل العمليات المطلوبة لتنفيذ الـ instruction', a: 2, why: '<b>Execute</b>: «performs the operations necessary to execute the instruction».' },
+        { q: 'الـ Program Counter بيطلّع عنوان الـ instruction على الـ address bus', a: 0, why: 'ده أول شيء في <b>Fetch</b>.' },
+        { q: 'كود الـ instruction بيتخزّن في الـ <span class="en">Instruction Register</span>', a: 0, why: 'ده آخر الـ <b>Fetch</b>.' },
+        { q: 'الـ control unit بتفهم الـ instruction اللي في الـ IR', a: 1, why: 'ده <b>Decode</b>.' },
+        { q: 'الـ ALU بتجمع رقمين', a: 2, why: 'عملية داخلية جزء من <b>Execute</b>.' },
+        { q: 'تزويد الذاكرة والـ I/O بالـ <span class="en">address, data &amp; control signals</span> المطلوبة', a: 2, why: 'ده نص السلايدة عن <b>Execute</b>.' },
+        { q: 'تفعيل إشارة <span class="en">READ</span> لقراءة الـ instruction', a: 0, why: 'الـ READ بتتفعّل في <b>Fetch</b> عشان الذاكرة تطلّع الكود.' }
+      ]
+    },
+
+    /* ---------- timing ---------- */
+    timing: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'In a memory read, the first thing the microprocessor places on the system bus (at the start of the clock cycle) is:', opts: ['The address', 'The data', 'The READ signal', 'The WRITE signal'], a: 0, why: 'الـ read بيبدأ بـ <b>الـ address</b> على الـ address bus.' },
+        { q: 'In a memory read, who places the data on the data bus?', opts: ['The memory', 'The microprocessor', 'The ALU', 'The clock'], a: 0, why: 'لما READ تتفعّل <b>الذاكرة</b> هي اللي بتحط الـ data، والـ microprocessor بيقراها.' },
+        { q: 'In a memory write, during the first clock pulse the processor places on the system bus:', opts: ['The address and the data', 'The address only', 'The data only', 'The READ signal'], a: 0, why: 'في الـ write الـ processor بيحط <b>الـ address والـ data</b> مع بعض.' },
+        { q: 'In a memory read, the READ signal is asserted:', opts: ['One clock cycle after the address is placed', 'Before the address is placed', 'At the same instant the data is removed', 'Only after the memory removes its data'], a: 0, why: 'عشان الذاكرة تلحق تفك الـ address وتجيب الـ data.' },
+        { q: 'At the end of a memory read cycle, which statement is correct?', opts: ['The microprocessor removes the address and deasserts READ; then the memory removes the data', 'The memory removes the address; then the CPU removes the data', 'The WRITE signal is deasserted', 'The data stays on the bus for the next cycle'], a: 0, why: 'ترتيب النهاية: CPU يشيل الـ address ويلغي READ، وبعدها الذاكرة تشيل الـ data.' },
+        { q: 'During a memory write operation, the data bus is driven by:', opts: ['The microprocessor', 'The memory', 'The ALU only', 'The READ signal'], a: 0, why: 'في الـ write الـ <b>CPU</b> هو اللي بيحط الـ data.' },
+        { q: 'Which control signal causes the memory to store the data?', opts: ['WRITE', 'READ', 'CLK', 'Address'], a: 0, why: '«the WRITE operation causes the memory to store the data».' },
+        { q: 'After a READ is asserted, the microprocessor takes the data from the bus and:', opts: ['Stores it in one of its registers', 'Stores it back to the address bus', 'Sends it to the ALU only', 'Deletes it'], a: 0, why: '«reads the data off the system bus and stores it in one of the registers».' }
+      ]
+    },
+
+    /* ---------- CPU ---------- */
+    cpu: {
+      cols: 3, shuffleOpts: false,
+      opts: ['Control Unit', 'ALU', 'Register section'],
+      cards: [
+        { q: 'بيجمع ويعمل <span class="en">AND</span>', a: 1, why: 'ده شغل الـ <b>ALU</b>.' },
+        { q: 'بيستلم بعض القيم من الـ register unit ويولّد منها <span class="en">control signals</span>', a: 0, why: 'ده <b>Control Unit</b>.' },
+        { q: 'فيه الـ <span class="en">Program Counter</span> والـ <span class="en">Instruction Register</span>', a: 2, why: 'الـ registers بتاعة الـ CPU في الـ <b>register section</b>.' },
+        { q: 'بيولّد <span class="en">READ, WRITE, IO/M</span> على الـ system control bus', a: 0, why: '<b>Control Unit</b> هي اللي بتولّد إشارات الـ control bus.' },
+        { q: 'فيه registers مش المبرمج بيقدر يوصلها مباشرة', a: 2, why: '«other registers that are not directly accessible by the programmer» — في الـ <b>register section</b>.' },
+        { q: '«الـ CPU بيتحكم في الكمبيوتر، و____ بتتحكم في الـ CPU»', a: 0, why: '<b>The control unit controls the CPU</b>.' },
+        { q: 'بينفّذ أغلب العمليات الحسابية والمنطقية', a: 1, why: '<b>ALU</b> — arithmetic and logic operations.' },
+        { q: 'الـ address bus والـ data bus بيتعاملوا مع القسم ده من الـ CPU', a: 2, why: '«The system address and data buses interact with this section» — <b>register section</b>.' },
+        { q: 'الـ registers اللي في الـ instruction set architecture موجودة فيه', a: 2, why: 'الـ <b>register section</b>.' }
+      ]
+    },
+
+    /* ---------- memory chip ---------- */
+    chip: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'A 1K × 8 memory chip needs how many address lines?', opts: ['10', '8', '1024', '13'], a: 0, why: '1K = 1024 = 2<sup>10</sup> ⇒ <b>10 address lines</b> (و8 data lines).' },
+        { q: 'A memory chip has 4 address lines. How many locations can it address?', opts: ['16', '4', '8', '64'], a: 0, why: '2<sup>4</sup> = <b>16</b>.' },
+        { q: 'A 64K × 16 chip has how many address lines and data lines?', opts: ['16 address, 16 data', '64 address, 16 data', '16 address, 64 data', '10 address, 16 data'], a: 0, why: '64K = 65,536 = 2<sup>16</sup> ⇒ <b>16 address lines</b>، والـ word = 16 bits ⇒ <b>16 data lines</b>.' },
+        { q: 'How many bits can a 256 × 8 memory chip store in total?', opts: ['2048', '256', '264', '8192'], a: 0, why: '256 × 8 = <b>2048 bits</b>.' },
+        { q: 'A chip has 11 address lines and 8-bit words. Its capacity in bytes is:', opts: ['2 KB (2048 bytes)', '1 KB', '11 KB', '8 KB'], a: 0, why: '2<sup>11</sup> = 2048 locations × 1 byte = <b>2048 bytes = 2 KB</b>.' },
+        { q: 'In a memory array, each row of cells constitutes:', opts: ['A memory word', 'A single bit', 'An address decoder', 'A control signal'], a: 0, why: '«Each row of cells constitutes a memory word».' },
+        { q: 'The word line of a memory row is driven by:', opts: ['The address decoder on the chip', 'The ALU', 'The instruction register', 'The data bus'], a: 0, why: '«which is driven by the address decoder on the chip».' },
+        { q: 'Each cell in the memory array is capable of storing:', opts: ['One bit', 'One byte', 'One word', 'One instruction'], a: 0, why: 'كل cell بتخزّن <b>bit</b> واحد.' }
+      ]
+    },
+
+    /* ---------- True / False traps ---------- */
+    traps: {
+      cols: 2,
+      opts: [{ t: 'صح ✔ (True)', cls: 't-ok' }, { t: 'غلط ✘ (False)', cls: 't-bad' }],
+      cards: [
+        { q: 'The address bus is used to transfer data between the CPU and memory.', a: 1, why: 'ده شغل الـ <b>data bus</b>. الـ address bus بيشيل <b>عنوان</b> الـ location بس.' },
+        { q: 'The system bus consists of three buses: the address bus, the data bus and the control bus.', a: 0, why: 'صح — «The system bus has three buses».' },
+        { q: 'The control bus carries the addresses of memory locations.', a: 1, why: 'العناوين على الـ <b>address bus</b>. الـ control bus بيشيل إشارات زي READ/WRITE.' },
+        { q: 'When the CPU reads from or writes to memory, it must first specify the address of the memory location it wishes to access.', a: 0, why: 'صح — بيحط العنوان على الـ address bus.' },
+        { q: 'The instruction cycle consists of two phases: fetch and execute.', a: 1, why: '<b>٣ phases</b>: Fetch و Decode و Execute.' },
+        { q: 'In the fetch phase, the processor reads the instruction from memory.', a: 0, why: 'صح — «First the processor fetches or reads the instruction from memory».' },
+        { q: 'In the decode phase, the processor performs the operations necessary to carry out the instruction.', a: 1, why: 'ده <b>Execute</b>. الـ Decode بس بيحدد أنهي instruction اتجابت.' },
+        { q: 'The READ signal is asserted by the microprocessor when it is ready to read data from memory or an I/O device.', a: 0, why: 'صح — تعريف الـ READ في السلايدة.' },
+        { q: 'In a memory read operation, the microprocessor places the data on the data bus and the memory reads it.', a: 1, why: 'العكس: <b>الذاكرة</b> هي اللي بتحط الـ data والـ microprocessor بيقراها.' },
+        { q: 'In a memory read, the microprocessor asserts READ one clock cycle after placing the address, giving memory time to decode the address and access its data.', a: 0, why: 'صح — نص السلايدة تقريباً.' },
+        { q: 'In a memory write operation, the processor places only the address on the bus and the memory supplies the data.', a: 1, why: 'في الـ write الـ processor بيحط <b>الـ address والـ data</b> مع بعض.' },
+        { q: 'At the end of a memory write, the processor removes the address and data from the bus and deasserts WRITE.', a: 0, why: 'صح — دي نهاية الـ write.' },
+        { q: 'The ALU generates the READ and WRITE control signals.', a: 1, why: 'الـ <b>Control Unit</b> هي اللي بتولّد إشارات الـ control bus.' },
+        { q: 'The ALU performs most arithmetic and logic operations, such as adding and ANDing values.', a: 0, why: 'صح — وصف الـ ALU في السلايدة.' },
+        { q: 'The processor has a register called the program counter and, during fetch, it first outputs the address of the instruction onto the address bus.', a: 0, why: 'صح — ده نص كلام السلايدة عن الـ fetch.' },
+        { q: 'The instruction code read from the data bus during fetch is stored in the program counter.', a: 1, why: 'بتتخزن في الـ <b>Instruction Register</b> مش الـ PC.' },
+        { q: 'In a memory chip, each cell stores one byte and each column constitutes a memory word.', a: 1, why: 'كل cell بتخزّن <b>bit</b> واحد، وكل <b>row</b> = memory word.' },
+        { q: 'The number of locations and the size of each location can vary from chip to chip but are fixed within an individual chip.', a: 0, why: 'صح — نص السلايدة.' },
+        { q: 'Auxiliary (backing) storage is used to replace the main memory.', a: 1, why: 'بيكمّله: <b>to supplement</b> main storage.' },
+        { q: 'The data bus is bi-directional: data moves both to and from memory.', a: 0, why: 'صح (Lecture 2) — والسلايدة بتقول CPU والذاكرة ليهم bi-directional relationship مع الـ data bus.' },
+        { q: 'The read and write control lines control the direction of data on the data bus.', a: 0, why: 'صح — نص السلايدة.' },
+        { q: 'The control unit controls the computer, and the CPU controls the control unit.', a: 1, why: 'العكس: <b>the CPU controls the computer, the control unit controls the CPU</b>.' },
+        { q: 'The address bus is one-directional: from the CPU to the memory.', a: 0, why: 'صح حسب <b>Lecture 2</b> (السلايدات الأولى مابتنصش على الاتجاه).' },
+        { q: 'The register section includes a set of registers and a bus or other communication mechanism.', a: 0, why: 'صح — نص السلايدة.' }
+      ]
+    },
+
+    /* ---------- final MCQ ---------- */
+    mcq: {
+      cols: 1, shuffleOpts: true,
+      cards: [
+        { q: 'Which bus is used by the CPU to specify the memory location it wants to read from or write to?', opts: ['Address bus', 'Data bus', 'Control bus', 'I/O bus'], a: 0, why: 'الـ <b>Address bus</b> بيشيل العنوان.' },
+        { q: 'The three phases of the instruction cycle are:', opts: ['Fetch, Decode, Execute', 'Fetch, Store, Execute', 'Read, Write, Execute', 'Load, Decode, Store'], a: 0, why: '<b>Fetch → Decode → Execute</b>.' },
+        { q: 'In a memory read operation, the READ signal is asserted:', opts: ['One clock cycle after the address is placed on the bus', 'Before the address is placed on the bus', 'After the data has been removed', 'Only by the memory'], a: 0, why: 'عشان الذاكرة تلحق تفك العنوان وتجيب الـ data.' },
+        { q: 'Which part of the CPU generates the READ, WRITE and IO/M control signals?', opts: ['Control unit', 'ALU', 'Register section', 'Main memory'], a: 0, why: 'الـ <b>Control unit</b>.' },
+        { q: 'The register that stores the instruction code after it is read from the data bus is usually called the:', opts: ['Instruction register', 'Program counter', 'Data bus register', 'Address register only'], a: 0, why: 'الـ <b>Instruction Register</b>.' },
+        { q: 'Which bus is one-directional, from the CPU to the memory?', opts: ['Address bus', 'Data bus', 'Control bus', 'All of them'], a: 0, why: 'الـ <b>Address bus</b> (حسب Lecture 2). الـ data bus ثنائي الاتجاه.' },
+        { q: 'In a memory write operation, during the first clock pulse the processor places on the system bus:', opts: ['The address and the data', 'Only the address', 'Only the data', 'The READ signal'], a: 0, why: 'الـ write = <b>address + data</b>.' },
+        { q: 'During the fetch phase, the processor first outputs the address of the instruction from the:', opts: ['Program counter', 'Instruction register', 'ALU', 'Data bus'], a: 0, why: 'الـ processor عنده register اسمه <b>Program Counter</b> بيطلّع منه العنوان.' },
+        { q: 'Auxiliary (backing) storage is used to:', opts: ['Supplement main storage', 'Replace the ALU', 'Generate control signals', 'Decode instructions'], a: 0, why: '<b>To supplement main storage</b>.' },
+        { q: 'Which statement about the ALU is correct?', opts: ['It performs most arithmetic and logic operations such as adding and ANDing', 'It generates the READ and WRITE signals', 'It stores the instruction code after fetch', 'It holds the address of the next instruction'], a: 0, why: 'الـ ALU = العمليات الحسابية والمنطقية.' }
+      ]
+    }
+  },
+
+  /* ---------- flashcards ---------- */
+  flash: {
+    main: [
+      { f: 'مكونات الـ <span class="en">Generic computer organization</span>؟', b: '<span class="en">Input Unit · Memory · Output Unit · Processor (Control Unit + ALU + Registers) · Auxiliary Storage</span>' },
+      { f: 'إيه الفرق بين الخط المتصل والخط المنقّط في رسمة الكمبيوتر؟', b: '<b class="en">Data path</b> = مسار البيانات (متصل).<br><b class="en">Control signals</b> = إشارات التحكم من الـ Control Unit (منقّط).' },
+      { f: 'مسار البيانات من أول البرنامج لحد النتيجة؟', b: '<span class="en">User → Input → Memory → (Instruction → Control Unit) &amp; (Operand → ALU) → Result → Memory → Output → User</span>' },
+      { f: '<span class="en">Auxiliary / Backing Storage</span> بيعمل إيه؟', b: '<b class="en">To supplement main storage</b> — بيكمّل الذاكرة الرئيسية (مش بيستبدلها).' },
+      { f: 'الـ <span class="en">System bus</span> فيه كام bus؟', b: '٣: <span class="en">Address · Data · Control</span>' },
+      { f: '<span class="en">Address bus</span>', b: 'الـ CPU بيحط عليه <b>عنوان</b> الـ location اللي عايزه (للقراءة أو الكتابة).<br>«the uppermost bus» — اتجاه واحد CPU→Memory <span class="en">(L2)</span>.' },
+      { f: '<span class="en">Data bus</span>', b: 'بينقل <b>البيانات</b> بين الـ CPU والذاكرة والـ I/O. <b class="en">Bi-directional</b>.' },
+      { f: '<span class="en">Control bus</span>', b: 'بيشيل <b>control signals</b> (<span class="en">READ, WRITE, IO/M</span>) بتحدد البيانات هتتقرا ولا هتتكتب، وبتتحكم في اتجاه الـ data bus.' },
+      { f: 'لما الـ CPU يعمل fetch للـ data من الذاكرة، إيه اللي بيحصل؟', b: '١) يطلّع عنوان الـ memory على الـ <span class="en">address bus</span>.<br>٢) الذاكرة تطلّع الـ data على الـ <span class="en">data bus</span>.' },
+      { f: 'العلاقة بين الـ CPU والذاكرة مع الـ data bus والـ control bus؟', b: '<span class="en">Bi-directional relationship</span> (السلايدة).' },
+      { f: '<span class="en">Instruction cycle</span> تعريفها؟', b: 'الإجراء اللي الـ microprocessor بيعدّي بيه عشان يعالج instruction. ٣ phases: <span class="en">Fetch → Decode → Execute</span>.' },
+      { f: '<span class="en">Fetch</span>', b: 'الـ processor يقرا الـ instruction من الذاكرة: يطلّع العنوان (PC) على الـ address bus، READ، والكود يوصل للـ <span class="en">instruction register</span>.' },
+      { f: '<span class="en">Decode</span>', b: 'يحدد <b>أنهي instruction</b> اتجابت (<span class="en">determining which instruction it has fetched</span>).' },
+      { f: '<span class="en">Execute</span>', b: 'يعمل العمليات المطلوبة: عملية داخلية + <span class="en">supplies address, data &amp; control signals</span> للذاكرة والـ I/O.' },
+      { f: 'إشارة <span class="en">READ</span>', b: 'إشارة على الـ control bus بيفعّلها الـ microprocessor لما يكون جاهز يقرا من الذاكرة أو الـ I/O. الذاكرة تحط الكود على الـ data bus والـ CPU يخزّنه في register.' },
+      { f: 'الفرق بين <span class="en">READ</span> و <span class="en">WRITE</span> عند الذاكرة؟', b: '<b class="en">READ</b>: الذاكرة تقرا وتطلّع الـ data.<br><b class="en">WRITE</b>: الذاكرة <b>تخزّن</b> الـ data.' },
+      { f: 'مين بيحط الـ data على الـ data bus؟', b: 'في <b class="en">READ</b>: الذاكرة.<br>في <b class="en">WRITE</b>: الـ CPU (microprocessor).' },
+      { f: 'خطوات <span class="en">Memory READ</span> (timing)', b: '① address على الـ bus في أول clock cycle ② بعد cycle: READ ③ الذاكرة تحط الـ data والـ CPU يقراها في register ④ في الآخر CPU يشيل address ويلغي READ ثم الذاكرة تشيل الـ data.' },
+      { f: 'خطوات <span class="en">Memory WRITE</span> (timing)', b: '① address + data على الـ bus في أول clock pulse ② WRITE ③ في آخر الـ second cycle CPU يشيل address و data ويلغي WRITE.' },
+      { f: 'تعريف الـ <span class="en">CPU</span>؟', b: 'الدوائر الإلكترونية اللي بتنفّذ instructions البرنامج بالعمليات الأساسية: <span class="en">arithmetic, logical, control, I/O</span>.' },
+      { f: '<span class="en">Register section</span>', b: 'مجموعة registers + bus/وسيلة اتصال. فيه registers الـ ISA وكمان registers مش المبرمج بيوصلها. الـ address و data buses بيتعاملوا معاه.' },
+      { f: '<span class="en">Program Counter</span>', b: 'الـ register اللي منه الـ processor بيطلّع عنوان الـ instruction على الـ address bus في الـ fetch.' },
+      { f: '<span class="en">Instruction Register</span>', b: 'بيخزّن كود الـ instruction اللي اتقرى من الـ data bus في آخر الـ fetch.' },
+      { f: '<span class="en">ALU</span>', b: 'أغلب العمليات الحسابية والمنطقية (<span class="en">adding, ANDing</span>).' },
+      { f: '<span class="en">Control Unit</span>', b: 'بتستلم قيم من الـ register unit وتولّد <span class="en">control signals</span>، وإشارات الـ system control bus: <span class="en">READ, WRITE, IO/M</span>.' },
+      { f: 'مين بيتحكم في مين؟', b: '<span class="en">The CPU controls the computer, the control unit controls the CPU.</span>' },
+      { f: '<span class="en">Memory</span> (subsystem) تعريف؟', b: 'مجموعة دوائر لتخزين البيانات. فيها locations، وكل word بيخزّن قيمة binary بطول ثابت.' },
+      { f: 'إيه الثابت وإيه المتغيّر في الذاكرة؟', b: 'عدد الـ locations وحجم كل location <b>بيتغيّر من شريحة لشريحة</b> لكن <b>ثابت جوه الشريحة الواحدة</b>.' },
+      { f: 'تنظيم شريحة الذاكرة الداخلي؟', b: '<span class="en">Array</span>: كل <b>cell = 1 bit</b>، كل <b>row = memory word</b>، وخلايا الصف متوصّلة بـ <b class="en">word line</b> بيحرّكها الـ <b class="en">address decoder</b>.' },
+      { f: 'شريحة <span class="en">1K × 8</span> فيها كام address line وكام data line؟', b: '١٠٢٤ location = 2<sup>10</sup> ⇒ <b>10 address lines</b> و <b>8 data lines</b> (Lecture 2).' },
+      { f: 'n address lines تعمل كام location؟', b: '<b>2<sup>n</sup></b> locations (Lecture 2).' }
+    ]
+  },
+
+  /* ---------- essay model answers ---------- */
+  essays: {
+    e1: {
+      model:
+        '<p dir="ltr" style="margin:0 0 8px">The <b>system bus</b> interconnects the CPU, memory and I/O units and consists of three buses:</p>' +
+        '<table class="tbl" style="margin:0" dir="ltr"><tr><th>Bus</th><th>What it carries</th><th>Direction</th></tr>' +
+        '<tr><td>Address bus</td><td>The address of the memory location (or I/O device) the CPU wants to read from or write to. The CPU must specify it before any read or write.</td><td>One-directional: CPU → memory</td></tr>' +
+        '<tr><td>Data bus</td><td>The data itself, moved between CPU, memory and I/O devices (e.g. after the address is sent, memory puts the data on the data bus).</td><td>Bi-directional</td></tr>' +
+        '<tr><td>Control bus</td><td>A collection of control signals (READ, WRITE, IO/M...) that tell whether data is to be read into or written out of the CPU; the read/write lines control the direction of data on the data bus.</td><td>Bi-directional relationship between CPU and memory</td></tr></table>',
+      points: [
+        'The system bus has three buses: address, data, control',
+        'Address bus: carries the location address; one-directional CPU → memory',
+        'Data bus: carries the data between components; bi-directional',
+        'Control bus: carries control signals (READ/WRITE); sets the direction of data on the data bus',
+        'Example: fetch — address on the address bus, then memory puts data on the data bus'
+      ]
+    },
+    e2: {
+      model:
+        '<p dir="ltr" style="margin:0 0 8px">The <b>instruction cycle</b> is the procedure a microprocessor goes through to process an instruction. It has three phases:</p>' +
+        '<ol dir="ltr" style="margin:0 0 8px"><li><b>Fetch</b> — the processor first outputs the address of the instruction on the address bus (held in the <b>program counter</b>), asserts READ, memory puts the instruction code on the data bus, and the CPU stores it in an internal register, usually the <b>instruction register</b>.</li>' +
+        '<li><b>Decode</b> — the processor decodes the instruction to determine which instruction it has fetched.</li>' +
+        '<li><b>Execute</b> — it performs the operations needed: some operation internally (e.g. in the ALU) and supplies the address, data and control signals needed by memory and I/O devices.</li></ol>',
+      points: [
+        'Definition: the procedure a microprocessor goes through to process an instruction; 3 phases',
+        'Fetch: address (from the program counter) on the address bus, instruction read from memory',
+        'Fetched code stored in the instruction register',
+        'Decode: determines which instruction was fetched',
+        'Execute: internal operation + supplies address, data and control signals to memory / I/O'
+      ]
+    },
+    e3: {
+      model:
+        '<p dir="ltr" style="margin:0 0 8px"><b>Memory READ</b></p>' +
+        '<ol dir="ltr" style="margin:0 0 10px"><li>At the beginning of a clock cycle the microprocessor places the <b>address</b> on the address bus.</li>' +
+        '<li>One clock cycle later (to let memory decode the address and access its data) it asserts the <b>READ</b> control signal.</li>' +
+        '<li>Memory places its <b>data</b> on the system data bus; during this clock cycle the microprocessor reads the data off the bus and stores it in a register.</li>' +
+        '<li>At the end of the cycle it removes the address and deasserts READ; memory then removes the data from the data bus.</li></ol>' +
+        '<p dir="ltr" style="margin:0 0 8px"><b>Memory WRITE — differences</b></p>' +
+        '<ul dir="ltr" style="margin:0"><li>The processor places <b>both the address and the data</b> on the system bus during the first clock pulse (the data comes from the CPU, not memory).</li>' +
+        '<li>It asserts <b>WRITE</b> instead of READ (in the second clock cycle) and memory stores the data.</li>' +
+        '<li>At the end of the second clock cycle it removes the address and data and deasserts WRITE.</li></ul>',
+      points: [
+        'READ: address placed at the start of a clock cycle',
+        'READ asserted one clock cycle later (memory decodes the address)',
+        'Memory puts data on the data bus; CPU stores it in a register',
+        'End: CPU removes address and deasserts READ; memory removes the data',
+        'WRITE: address AND data placed together by the CPU; WRITE asserted; all removed at the end of the 2nd cycle'
+      ]
+    },
+    e4: {
+      model:
+        '<p dir="ltr" style="margin:0 0 8px"><b>CPU organization</b> — the CPU carries out program instructions by performing arithmetic, logical, control and I/O operations. Its parts:</p>' +
+        '<ul dir="ltr" style="margin:0 0 10px"><li><b>Register section</b>: a set of registers (including the program counter and instruction register, and others not directly accessible to the programmer) plus a bus/communication mechanism; the address and data buses interact with it.</li>' +
+        '<li><b>ALU</b>: performs most arithmetic and logic operations (adding, ANDing).</li>' +
+        '<li><b>Control unit</b>: receives values from the register unit to generate control signals, including the system control bus signals READ, WRITE and IO/M. The CPU controls the computer; the control unit controls the CPU.</li></ul>' +
+        '<p dir="ltr" style="margin:0 0 8px"><b>Memory chip organization</b> — memory is organized as an array in which each cell stores one bit; each row of cells forms a memory word; all cells of a row are connected to a common word line driven by the address decoder on the chip. The number of locations and the word size vary between chips but are fixed within a chip.</p>',
+      points: [
+        'CPU definition: executes program instructions (arithmetic, logic, control, I/O)',
+        'Register section: registers (PC, IR, hidden ones) + communication mechanism',
+        'ALU: arithmetic and logic operations',
+        'Control unit: generates control signals (READ, WRITE, IO/M)',
+        'Memory chip: array, cell = 1 bit, row = word, word line driven by address decoder'
+      ]
+    }
+  }
+};
+</script>
+<script>
+/* ==========================================================
+   CS202 study pages — shared interactive engine
+   Reads window.DATA = { decks:{}, flash:{}, essays:{} }
+   ========================================================== */
+(function () {
+  'use strict';
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const shuffle = (a) => {
+    a = a.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  const DATA = window.DATA || {};
+  const KEY = 'cs202:' + (document.body.dataset.lecture || 'x');
+  let S = {};
+  try { S = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { S = {}; }
+  S.done = S.done || {}; S.best = S.best || {}; S.fc = S.fc || {}; S.essay = S.essay || {};
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+  /* ---------- theme ---------- */
+  const TK = 'cs202:theme';
+  let theme = 'dark';
+  try { theme = localStorage.getItem(TK) || 'dark'; } catch (e) {}
+  const themeBtn = $('#themeBtn');
+  function applyTheme(t) {
+    theme = t;
+    document.documentElement.setAttribute('data-theme', t);
+    if (themeBtn) themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem(TK, t); } catch (e) {}
+  }
+  applyTheme(theme);
+  if (themeBtn) themeBtn.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+
+  /* ---------- stations ---------- */
+  const stations = $$('.station');
+  const nav = $('#nav');
+  const navBtns = [];
+  let cur = -1;
+
+  stations.forEach((st, i) => {
+    if (nav) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = `<span class="num">${i + 1}</span><span class="lbl">${st.dataset.icon || ''} ${st.dataset.title || ''}</span><span class="tick">✓</span>`;
+      b.addEventListener('click', () => go(i));
+      nav.appendChild(b);
+      navBtns.push(b);
+    }
+    const last = i === stations.length - 1;
+    const f = document.createElement('div');
+    f.className = 'station-foot noprint';
+    f.innerHTML =
+      `<button type="button" class="btn ghost" data-prev${i === 0 ? ' style="visibility:hidden"' : ''}>→ السابق</button>` +
+      (last
+        ? `<a class="btn primary" href="index.html" data-finish>خلّصت المحاضرة 🏁</a>`
+        : `<button type="button" class="btn primary" data-next>التالي ←</button>`);
+    st.appendChild(f);
+    const p = $('[data-prev]', f), n = $('[data-next]', f), fin = $('[data-finish]', f);
+    if (p) p.addEventListener('click', () => go(i - 1));
+    if (n) n.addEventListener('click', () => go(i + 1));
+    if (fin) fin.addEventListener('click', () => { S.done[i] = true; save(); });
+  });
+
+  function refresh() {
+    navBtns.forEach((b, k) => {
+      b.classList.toggle('on', k === cur);
+      b.classList.toggle('done', !!S.done[k]);
+    });
+    const n = stations.filter((_, k) => S.done[k]).length;
+    const pb = $('#progBar'), pt = $('#progTxt');
+    if (pb) pb.style.width = (n / stations.length * 100) + '%';
+    if (pt) pt.textContent = n + '/' + stations.length;
+  }
+
+  function go(i, init) {
+    i = Math.max(0, Math.min(stations.length - 1, i));
+    if (!init && cur >= 0 && i > cur) S.done[cur] = true;
+    cur = i;
+    stations.forEach((s, k) => s.classList.toggle('on', k === i));
+    S.last = i; save(); refresh();
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    if (!init) window.scrollTo({ top: 0, behavior: 'smooth' });
+    const nb = navBtns[i];
+    if (nb && nav && nav.scrollWidth > nav.clientWidth) nb.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }
+
+  $$('[data-go]').forEach((e) => e.addEventListener('click', () => go(parseInt(e.dataset.go, 10) - 1)));
+
+  /* ---------- flip cards ---------- */
+  $$('.flip').forEach((el) => {
+    const f = $('.f', el), b = $('.b', el);
+    if (!f || !b) return;
+    const inn = document.createElement('div');
+    inn.className = 'flip-in';
+    f.className = 'face front'; b.className = 'face back';
+    inn.append(f, b); el.append(inn);
+    el.tabIndex = 0;
+    el.addEventListener('click', () => el.classList.toggle('open'));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.classList.toggle('open'); }
+    });
+  });
+
+  /* ---------- tabs ---------- */
+  $$('[data-tabs]').forEach((root) => {
+    const btns = $$('[data-tab]', root), panes = $$('[data-pane]', root);
+    const set = (id) => {
+      btns.forEach((b) => b.classList.toggle('on', b.dataset.tab === id));
+      panes.forEach((p) => p.classList.toggle('on', p.dataset.pane === id));
+    };
+    btns.forEach((b) => b.addEventListener('click', () => set(b.dataset.tab)));
+    set(root.dataset.tabs || (btns[0] && btns[0].dataset.tab));
+  });
+
+  /* ---------- deck (quiz / sorting / true-false) ---------- */
+  function Deck(root, cfg) {
+    let cards = shuffle(cfg.cards), i = 0, score = 0, locked = false, order = [];
+    root.classList.add('deck');
+    root.innerHTML =
+      `<div class="deck-head"><span class="cnt"></span><div class="deck-bar"><i></i></div><span class="sc"></span></div><div class="deck-body"></div>`;
+    const body = $('.deck-body', root), cnt = $('.cnt', root), bar = $('.deck-bar i', root), sc = $('.sc', root);
+
+    function render() {
+      if (i >= cards.length) return end();
+      const c = cards[i];
+      locked = false;
+      cnt.textContent = (i + 1) + ' / ' + cards.length;
+      bar.style.width = (i / cards.length * 100) + '%';
+      sc.textContent = '⭐ ' + score;
+      const opts = c.opts || cfg.opts;
+      const cols = cfg.cols ? ' c' + cfg.cols : '';
+      body.innerHTML = `<div class="deck-q" dir="auto">${c.q}</div><div class="opts${cols}"></div><div class="fbwrap"></div>`;
+      const wrap = $('.opts', body);
+      // cfg.shuffleOpts: mix the answer order of per-card MCQ options so position never gives the answer away
+      order = opts.map((_, k) => k);
+      if (cfg.shuffleOpts && c.opts) order = shuffle(order);
+      order.forEach((oi, k) => {
+        const o = opts[oi];
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'opt' + (typeof o === 'object' && o.cls ? ' ' + o.cls : '');
+        b.setAttribute('dir', 'auto');
+        b.innerHTML = typeof o === 'string' ? o : o.t;
+        b.addEventListener('click', () => pick(k));
+        wrap.appendChild(b);
+      });
+    }
+
+    function pick(k) {
+      if (locked) return;
+      locked = true;
+      const c = cards[i], ok = order[k] === c.a;
+      if (ok) score++;
+      $$('.opt', body).forEach((b, j) => {
+        b.disabled = true;
+        if (order[j] === c.a) b.classList.add('right');
+        else if (j === k) b.classList.add('wrong');
+      });
+      sc.textContent = '⭐ ' + score;
+      const fb = $('.fbwrap', body);
+      fb.innerHTML =
+        `<div class="fb ${ok ? 'ok' : 'no'}"><b>${ok ? '✔ تمام!' : '✘ لأ — راجع الشرح'}</b><div dir="auto">${c.why || ''}</div>` +
+        `<button type="button" class="btn primary nxt">${i === cards.length - 1 ? 'شوف النتيجة' : 'التالي ←'}</button></div>`;
+      const nx = $('.nxt', fb);
+      nx.addEventListener('click', () => { i++; render(); });
+      nx.focus({ preventScroll: true });
+    }
+
+    function end() {
+      bar.style.width = '100%';
+      const pct = Math.round(score / cards.length * 100);
+      const best = Math.max(S.best[cfg.id] || 0, pct);
+      S.best[cfg.id] = best; save();
+      const msg = pct === 100 ? 'ممتاز! 🔥 الجزء ده تمام' : pct >= 70 ? 'كويس جداً 👏 راجع الغلطات بس' : 'لسه محتاج مراجعة — ارجع للشرح وجرّب تاني 💪';
+      sc.textContent = '⭐ ' + score;
+      cnt.textContent = 'خلصت';
+      body.innerHTML =
+        `<div class="deck-end"><div class="big">${pct}%</div><p>${score} من ${cards.length} — ${msg}</p>` +
+        `<p class="muted">أحسن نتيجة ليك: ${best}%</p><button type="button" class="btn primary again">🔁 العب تاني</button></div>`;
+      $('.again', body).addEventListener('click', () => { cards = shuffle(cfg.cards); i = 0; score = 0; render(); });
+      if (cfg.onDone) cfg.onDone(pct);
+    }
+    render();
+  }
+
+  /* ---------- flashcards ---------- */
+  function Flash(root, cards, id) {
+    let mode = 'all', pos = 0, list = [], timer;
+    root.classList.add('fc');
+    root.innerHTML =
+      `<div class="fc-top"><div class="seg"><button type="button" data-m="all" class="on">كل الكروت</button><button type="button" data-m="review">اللي لسه مش حافظها</button></div><span class="fc-count muted"></span></div>` +
+      `<div class="fc-card" tabindex="0"><div class="fc-in"><div class="face front"></div><div class="face back"></div></div></div>` +
+      `<div class="fc-actions"><button type="button" class="btn" data-a="prev">→ اللي قبلها</button><button type="button" class="btn bad" data-a="r">🔁 لسه مش حافظها</button><button type="button" class="btn good" data-a="k">✅ عرفتها</button><button type="button" class="btn" data-a="next">اللي بعدها ←</button></div>` +
+      `<div class="deck-bar"><i></i></div><p class="fc-stat muted"></p>`;
+    const card = $('.fc-card', root), front = $('.front', root), back = $('.back', root);
+    const cnt = $('.fc-count', root), bar = $('.deck-bar i', root), stat = $('.fc-stat', root);
+    const key = (n) => id + ':' + n;
+
+    function stats() {
+      const k = cards.filter((_, n) => S.fc[key(n)] === 'k').length;
+      stat.textContent = 'عرفت ' + k + ' من ' + cards.length;
+      bar.style.width = (k / cards.length * 100) + '%';
+    }
+    function show() {
+      list = cards.map((_, n) => n).filter((n) => mode === 'all' || S.fc[key(n)] !== 'k');
+      stats();
+      clearTimeout(timer);
+      if (!list.length) {
+        card.classList.remove('open');
+        front.innerHTML = '<div dir="auto">🎉 خلصت كل الكروت!</div><small>ارجع لـ "كل الكروت" لو عايز تراجع تاني</small>';
+        back.innerHTML = '';
+        cnt.textContent = '0 / 0';
+        return;
+      }
+      pos = ((pos % list.length) + list.length) % list.length;
+      const c = cards[list[pos]];
+      const fill = () => {
+        front.innerHTML = `<small>السؤال</small><div dir="auto">${c.f}</div><small>👆 اضغط عشان تقلب الكارت</small>`;
+        back.innerHTML = `<small>الإجابة</small><div dir="auto">${c.b}</div>`;
+      };
+      if (card.classList.contains('open')) { card.classList.remove('open'); timer = setTimeout(fill, 230); } else fill();
+      cnt.textContent = (pos + 1) + ' / ' + list.length;
+    }
+
+    root.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-a]');
+      if (a) {
+        const act = a.dataset.a;
+        if (act === 'next') pos++;
+        else if (act === 'prev') pos--;
+        else {
+          S.fc[key(list[pos])] = act; save();
+          if (!(mode === 'review' && act === 'k')) pos++;
+        }
+        show();
+        return;
+      }
+      const m = e.target.closest('[data-m]');
+      if (m) {
+        mode = m.dataset.m; pos = 0;
+        $$('[data-m]', root).forEach((x) => x.classList.toggle('on', x === m));
+        show();
+        return;
+      }
+      if (e.target.closest('.fc-card')) card.classList.toggle('open');
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('open'); }
+    });
+    show();
+  }
+
+  /* ---------- essay ---------- */
+  $$('.essay').forEach((el) => {
+    const id = el.dataset.essay, d = (DATA.essays || {})[id];
+    if (!d) return;
+    const ta = $('textarea', el), btn = $('[data-show]', el), box = $('.model', el);
+    ta.value = S.essay[id] || '';
+    ta.addEventListener('input', () => { S.essay[id] = ta.value; save(); });
+    $('.mdl', box).innerHTML = d.model;
+    const pts = $('.pts', box);
+    pts.innerHTML =
+      '<h4>✅ علّم على النقط اللي غطّيتها في إجابتك:</h4>' +
+      d.points.map((p) => `<label class="chk"><input type="checkbox"> <span dir="auto">${p}</span></label>`).join('') +
+      '<div class="pts-sc"></div>';
+    const sc = $('.pts-sc', pts);
+    const upd = () => {
+      const n = $$('input:checked', pts).length;
+      sc.textContent = 'غطّيت ' + n + ' من ' + d.points.length + (n === d.points.length ? ' 🔥' : '');
+    };
+    pts.addEventListener('change', upd); upd();
+    btn.addEventListener('click', () => {
+      box.hidden = !box.hidden;
+      btn.textContent = box.hidden ? '📖 اعرض الإجابة النموذجية' : '🙈 اخفي الإجابة';
+    });
+  });
+
+  /* ---------- keyboard for flashcards ---------- */
+  document.addEventListener('keydown', (e) => {
+    if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const st = stations[cur];
+    const fc = st && $('.fc', st);
+    if (!fc) return;
+    if (e.key === 'ArrowLeft') $('[data-a="next"]', fc).click();
+    else if (e.key === 'ArrowRight') $('[data-a="prev"]', fc).click();
+    else if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); $('.fc-card', fc).classList.toggle('open'); }
+  });
+
+  /* ---------- init decks / flashcards ---------- */
+  const markDone = (el) => {
+    const i = stations.indexOf(el.closest('.station'));
+    if (i >= 0) { S.done[i] = true; save(); refresh(); }
+  };
+  $$('[data-deck]').forEach((el) => {
+    const c = (DATA.decks || {})[el.dataset.deck];
+    if (c) Deck(el, Object.assign({}, c, { id: el.dataset.deck, onDone: () => markDone(el) }));
+  });
+  $$('[data-flash]').forEach((el) => {
+    const c = (DATA.flash || {})[el.dataset.flash];
+    if (c) Flash(el, c, el.dataset.flash);
+  });
+
+  /* ---------- share disclaimer: ONE place, shows at the bottom of every page (index.src.html has its own copy) ---------- */
+  /* >>> EDIT PER SUBJECT: name the real sources (textbook, instructor, slides) <<< */
+  const SOURCES_AR = 'المصادر: ملف المحاضرة الأولى «Introduction to Computer Architecture and Organization» (سلايدات د. Ibrahim Selim) وملف المحاضرة التانية «Computer Memory and Memory Hierarchy» (Study Notes &amp; Illustrated Guide). مفيش كتاب مرجع اتحط — التعليمات قالت المذاكرة على المحاضرات بس.';
+  const SOURCES_EN = 'Sources: Lecture 1 slides “Introduction to Computer Architecture and Organization” (Dr Ibrahim Selim) and Lecture 2 notes “Computer Memory and Memory Hierarchy” (Study Notes &amp; Illustrated Guide). No textbook was used — the exam notice says to study from the lecture files only.';
+  (function () {
+    const f = document.createElement('footer');
+    f.className = 'disclaimer';
+    f.innerHTML =
+      '<div dir="rtl"><b>⚠️ تنبيه مهم قبل ما تعتمد على الصفحات دي:</b> دي ملخصات ومراجعة شخصية من إعداد طالب لمساعدة زمايله، وهي <b>مش مادة رسمية</b> ومش معتمدة من الدكتور ولا من الكلية. ممكن يكون فيها أخطاء أو نقص، والأسئلة اللي فيها مش بالضرورة شبه الامتحان الحقيقي. ' +
+      '<b>ومبتغنيش أبداً عن الكتاب والمحاضرات (المصدر الأساسي)</b> — ذاكر منهم الأول، وارجع لهم عشان تتأكد من أي معلومة. أي اعتماد مباشر على الصفحات دي بيكون على مسئولية المستخدم نفسه، ومُعِدّ الملخص غير مسئول عن أي نتيجة أو خسارة درجات. ' +
+      '<span class="muted">' + SOURCES_AR + '</span>' +
+      '<div class="d-en"><b>Disclaimer:</b> Unofficial, student-made study notes shared to help classmates — not official course material and not endorsed by the instructor or the university. They may contain mistakes or omissions, and the practice questions may differ from the real exam. ' +
+      'These pages are <b>NOT a substitute for the textbook and the lectures</b> (the primary source): study those first and use them to verify anything written here. Anyone relying on these pages directly does so at their own risk; the author accepts no responsibility for any result or loss of marks. ' + SOURCES_EN + '</div></div>';
+    document.body.appendChild(f);
+  })();
+
+  /* ---------- start ---------- */
+  let start = parseInt((location.hash || '').slice(1), 10) - 1;
+  if (!(start >= 0 && start < stations.length)) start = Math.min(S.last || 0, stations.length - 1);
+  go(start, true);
+
+  window.Study = { go };
+})();
+
+</script>
+<script>
+/* ================= lecture-1 interactive widgets ================= */
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var EN = function (t) { return '<span class="en">' + t + '</span>'; };
+  var NS = 'http://www.w3.org/2000/svg';
+
+  /* ---------- A · computer organization ---------- */
+  (function () {
+    var svg = $('#orgSvg'); if (!svg) return;
+    var info = $('#orgInfo');
+    var INFO = {
+      input: ['Input Unit', 'بياخد الـ ' + EN('Program and Data') + ' من المستخدم (' + EN('From User') + ') ويدخّلهم للـ ' + EN('Memory') + '.'],
+      memory: ['Memory', 'مجموعة دوائر بتخزّن البيانات. فيها الـ ' + EN('instructions') + ' (بتروح للـ Control Unit) والـ ' + EN('operands') + ' (بتروح للـ ALU)، وبترجع لها الـ ' + EN('Result') + '.'],
+      output: ['Output Unit', 'بيوصّل الـ ' + EN('Result') + ' للمستخدم (' + EN('To User') + ').'],
+      cu: ['Control Unit', 'بيتحكم في الـ CPU. بيبعت ' + EN('control signals') + ': ' + EN('Read / Write') + ' للـ Memory، و' + EN('Add / Shift') + ' للـ ALU، وإشارات للـ Input/Output والـ Auxiliary storage.'],
+      alu: ['ALU', EN('Arithmetic / Logic Unit') + ': بتاخد الـ ' + EN('Operand') + ' من الذاكرة وبتنفّذ العملية اللي الـ Control Unit طلبتها (' + EN('Add, Shift') + '...) وبترجّع الـ ' + EN('Result') + '.'],
+      reg: ['Registers', 'جزء من الـ ' + EN('Processor') + ' — خانات سريعة جوه الـ CPU (فيها مثلاً الـ ' + EN('Program Counter') + ' والـ ' + EN('Instruction Register') + ' — هنشوفهم بعدين).'],
+      cpu: ['Processor (CPU)', 'المربع المنقّط الكبير = ' + EN('Control Unit + ALU + Registers') + '.'],
+      aux: ['Auxiliary Storage', EN('(Backing Storage)') + ' — ' + EN('To supplement main storage') + ': بيكمّل الذاكرة الرئيسية بمساحة تخزين إضافية.']
+    };
+    var rects = {};
+    $$('[data-part]', svg).forEach(function (g) { rects[g.dataset.part] = $('rect', g); });
+    function clearAll() {
+      $$('.blk,.ln', svg).forEach(function (e) { e.classList.remove('sel', 'hl'); });
+    }
+    function show(k) {
+      clearAll();
+      rects[k].classList.add('sel');
+      info.innerHTML = '<b>' + INFO[k][0] + '</b> — ' + INFO[k][1];
+    }
+    svg.addEventListener('click', function (e) {
+      var g = e.target.closest('[data-part]'); if (g) show(g.dataset.part);
+    });
+    svg.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { var g = e.target.closest('[data-part]'); if (g) { e.preventDefault(); show(g.dataset.part); } }
+    });
+    var STEPS = [
+      { hl: ['input', 'l-in'], t: '① البرنامج والبيانات بيجوا من المستخدم عن طريق الـ ' + EN('Input Unit') + '…' },
+      { hl: ['memory', 'l-in'], t: '② …وبيتخزّنوا في الـ ' + EN('Memory') + ' (الـ instructions والـ operands).' },
+      { hl: ['cu', 'memory', 'l-instr', 'c-mem'], t: '③ الـ ' + EN('Control Unit') + ' بتاخد الـ ' + EN('Instruction') + ' من الذاكرة، وبتبعت لها إشارات ' + EN('Read/Write') + '.' },
+      { hl: ['alu', 'memory', 'l-operand', 'c-alu', 'l-cualu'], t: '④ الـ ' + EN('Operand') + ' بيروح للـ ' + EN('ALU') + '، والـ Control Unit تقولها تعمل إيه (' + EN('Add / Shift') + ').' },
+      { hl: ['alu', 'memory', 'l-result'], t: '⑤ الـ ALU بترجّع الـ ' + EN('Result') + ' للذاكرة.' },
+      { hl: ['memory', 'output', 'l-out', 'c-out'], t: '⑥ النتيجة بتتبعت للـ ' + EN('Output Unit') + ' وبتوصل للمستخدم (' + EN('To User') + ').' }
+    ];
+    var si = -1;
+    function hlStep(i) {
+      clearAll();
+      STEPS[i].hl.forEach(function (id) {
+        if (rects[id]) rects[id].classList.add('hl');
+        else { var l = document.getElementById(id); if (l) l.classList.add('hl'); }
+      });
+      info.innerHTML = STEPS[i].t + '<br><span class="en plain muted">' + (i + 1) + ' / ' + STEPS.length + '</span>';
+    }
+    $('#orgNext').addEventListener('click', function () { si = (si + 1) % STEPS.length; hlStep(si); });
+    $('#orgReset').addEventListener('click', function () { si = -1; clearAll(); info.innerHTML = '👆 اضغط على أي مربع في الرسمة.'; });
+  })();
+
+  /* ---------- B · bus simulator ---------- */
+  (function () {
+    var dots = $('#busDots'); if (!dots) return;
+    var Y = { a: 60, d: 115, c: 170 }, XL = 124, XR = 536;
+    var CL = { a: 'ph-plan', d: 'ph-ana', c: 'ph-des' };
+    var busy = false, log = $('#busLog');
+    function fly(bus, dir, label) {
+      return new Promise(function (res) {
+        var g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'dotg ' + bus);
+        var c = document.createElementNS(NS, 'circle'); c.setAttribute('r', '10'); c.setAttribute('cx', '0'); c.setAttribute('cy', '0');
+        var t = document.createElementNS(NS, 'text'); t.setAttribute('x', '0'); t.setAttribute('y', '-16'); t.setAttribute('text-anchor', 'middle'); t.textContent = label;
+        g.appendChild(c); g.appendChild(t); dots.appendChild(g);
+        var from = dir === 0 ? XL + 12 : XR - 12, to = dir === 0 ? XR - 12 : XL + 12, t0 = null, D = 1100;
+        function frame(ts) {
+          if (t0 === null) t0 = ts;
+          var p = Math.min(1, (ts - t0) / D), e = p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+          g.setAttribute('transform', 'translate(' + (from + (to - from) * e) + ',' + Y[bus] + ')');
+          if (p < 1) requestAnimationFrame(frame); else { setTimeout(function () { dots.removeChild(g); res(); }, 250); }
+        }
+        g.setAttribute('transform', 'translate(' + from + ',' + Y[bus] + ')');
+        requestAnimationFrame(frame);
+      });
+    }
+    var SEQ = {
+      read: [
+        ['a', 0, 'Address', 'الـ CPU بيحط <b>عنوان</b> الـ location على الـ ' + EN('address bus') + ' (' + EN('CPU → Memory') + ').'],
+        ['c', 0, 'READ', 'الـ CPU بيفعّل <b>READ</b> على الـ ' + EN('control bus') + ' — «اديني اللي في العنوان ده».'],
+        ['d', 1, 'Data', 'الذاكرة بترد وبتحط الـ <b>data</b> على الـ ' + EN('data bus') + ' — الاتجاه <b>راجع للـ CPU</b> (' + EN('Memory → CPU') + ').']
+      ],
+      write: [
+        ['a', 0, 'Address', 'الـ CPU بيحط <b>عنوان</b> الـ location على الـ ' + EN('address bus') + '.'],
+        ['d', 0, 'Data', 'الـ CPU بيحط الـ <b>data</b> على الـ ' + EN('data bus') + ' — الاتجاه <b>رايح للذاكرة</b> (' + EN('CPU → Memory') + ').'],
+        ['c', 0, 'WRITE', 'الـ CPU بيفعّل <b>WRITE</b> على الـ ' + EN('control bus') + ' — «خزّن اللي على الـ data bus في العنوان ده».']
+      ]
+    };
+    async function run(kind) {
+      if (busy) return; busy = true;
+      $('#busRead').disabled = $('#busWrite').disabled = true;
+      log.innerHTML = '';
+      var n = 0;
+      for (var s of SEQ[kind]) {
+        n++;
+        var li = document.createElement('li'); li.className = CL[s[0]];
+        li.innerHTML = '<b>' + n + '.</b> ' + s[3]; log.appendChild(li);
+        await fly(s[0], s[1], s[2]);
+      }
+      var done = document.createElement('li'); done.className = 'ph-imp'; done.innerHTML = '✅ ' + (kind === 'read' ? EN('Memory READ') + ' خلصت: الـ CPU استلم الـ data.' : EN('Memory WRITE') + ' خلصت: الذاكرة خزّنت الـ data.');
+      log.appendChild(done);
+      $('#busRead').disabled = $('#busWrite').disabled = false; busy = false;
+    }
+    $('#busRead').addEventListener('click', function () { run('read'); });
+    $('#busWrite').addEventListener('click', function () { run('write'); });
+    /* highlight the bus that matches the selected tab */
+    var map = { a: 'busA', d: 'busD', c: 'busC' };
+    function sel(k) {
+      Object.keys(map).forEach(function (x) {
+        var el = document.getElementById(map[x]);
+        el.classList.toggle('hl', x === k);
+        el.classList.toggle('dim', x !== k);
+      });
+    }
+    $$('#busTabs [data-tab]').forEach(function (b) { b.addEventListener('click', function () { sel(b.dataset.tab); }); });
+    sel('a');
+  })();
+
+  /* ---------- C · instruction cycle simulator ---------- */
+  (function () {
+    var root = $('#icCard'); if (!root) return;
+    var PH = { '': ['Ready', ''], f: ['Fetch', 'ph-f'], dc: ['Decode', 'ph-dc'], ex: ['Execute', 'ph-ex'] };
+    var D = '—';
+    var S = [
+      { p: '', pc: 100, ir: D, ab: D, db: D, cb: D, row: 0, m: D, t: 'جاهزين. في الذاكرة برنامج صغير: عند <b>100</b> الـ ' + EN('ADD R1, R2') + ' وعند <b>101</b> الـ ' + EN('STORE R1 → [200]') + '. الـ ' + EN('Program Counter') + ' بيشاور على أول instruction (<b>100</b>).' },
+      { p: 'f', pc: 100, ir: D, ab: '100', db: D, cb: D, row: 100, m: D, t: '① <b>Fetch:</b> الـ processor بيطلّع عنوان الـ instruction (الموجود في الـ PC = 100) على الـ ' + EN('address bus') + '.' },
+      { p: 'f', pc: 100, ir: D, ab: '100', db: D, cb: 'READ', row: 100, m: D, t: '② بيفعّل إشارة ' + EN('READ') + ' على الـ control bus — «أنا جاهز أقرا من الذاكرة».' },
+      { p: 'f', pc: 100, ir: D, ab: '100', db: 'ADD R1,R2', cb: 'READ', row: 100, m: D, t: '③ الذاكرة بتحط كود الـ instruction على الـ ' + EN('data bus') + '.' },
+      { p: 'f', pc: 100, ir: 'ADD R1,R2', ab: '100', db: 'ADD R1,R2', cb: 'READ', row: 100, m: D, t: '④ الـ CPU بيقرا الكود من الـ data bus ويخزّنه في الـ ' + EN('Instruction Register (IR)') + '. كده الـ Fetch خلص.' },
+      { p: 'dc', pc: 100, ir: 'ADD R1,R2', ab: D, db: D, cb: D, row: 0, m: D, t: '⑤ <b>Decode:</b> الـ control unit بتفسّر اللي في الـ IR وتعرف أنهي instruction اتجابت — ده ' + EN('ADD') + '. (لسه مانفّذناش حاجة.)' },
+      { p: 'ex', pc: 100, ir: 'ADD R1,R2', ab: D, db: D, cb: D, row: 0, m: D, t: '⑥ <b>Execute:</b> الـ ALU بتجمع ' + EN('R1 + R2') + ' — <b>عملية داخلية</b> جوه الـ CPU. الـ instruction دي ماحتجتش حاجة من الذاكرة في التنفيذ.' },
+      { p: 'f', pc: 101, ir: 'ADD R1,R2', ab: '101', db: D, cb: D, row: 101, m: D, t: '⑦ Instruction تانية. الـ PC بقى <b>101</b> <span class="muted">(فهم عام: الـ PC بيتحرك للـ instruction اللي بعدها — مش مكتوب في السلايدات)</span>. العنوان 101 على الـ address bus.' },
+      { p: 'f', pc: 101, ir: 'ADD R1,R2', ab: '101', db: D, cb: 'READ', row: 101, m: D, t: '⑧ READ تتفعّل.' },
+      { p: 'f', pc: 101, ir: 'ADD R1,R2', ab: '101', db: 'STORE R1,[200]', cb: 'READ', row: 101, m: D, t: '⑨ الذاكرة بتحط كود الـ instruction على الـ data bus.' },
+      { p: 'f', pc: 101, ir: 'STORE R1,[200]', ab: '101', db: 'STORE R1,[200]', cb: 'READ', row: 101, m: D, t: '⑩ الكود اتخزّن في الـ IR (استبدل القديم). الـ Fetch خلص.' },
+      { p: 'dc', pc: 101, ir: 'STORE R1,[200]', ab: D, db: D, cb: D, row: 0, m: D, t: '⑪ <b>Decode:</b> دي ' + EN('STORE') + ' — لازم نكتب R1 في الذاكرة عند العنوان 200.' },
+      { p: 'ex', pc: 101, ir: 'STORE R1,[200]', ab: '200', db: 'R1', cb: 'WRITE', row: 200, m: 'R1 ✔', t: '⑫ <b>Execute:</b> الـ CPU بيدّي الذاكرة الـ <b>address</b> (200) والـ <b>data</b> (R1) والـ <b>control signal</b> (WRITE). ده بالظبط اللي السلايدة بتقوله: <span class="en">supplies the address, data &amp; control signals needed by memory &amp; I/O devices</span>.' }
+    ];
+    var i = 0, timer = null;
+    var dots = $('#icDots');
+    S.forEach(function (s, k) { var d = document.createElement('i'); d.className = s.p; dots.appendChild(d); });
+    function render() {
+      var s = S[i], ph = PH[s.p];
+      var b = $('#icPhase'); b.textContent = ph[0]; b.className = 'ic-badge ' + ph[1];
+      $('#icPC').textContent = s.pc; $('#icIR').textContent = s.ir;
+      $('#icAB').textContent = s.ab; $('#icDB').textContent = s.db; $('#icCB').textContent = s.cb;
+      $('#icPCb').classList.toggle('on', s.p === 'f' && s.ab !== D);
+      $('#icIRb').classList.toggle('on', s.ir !== D && (s.p === 'dc' || (s.p === 'f' && s.ir !== D && s.db === s.ir)));
+      $('#icABb').classList.toggle('on', s.ab !== D);
+      $('#icDBb').classList.toggle('on', s.db !== D);
+      $('#icCBb').classList.toggle('on', s.cb !== D);
+      [100, 101, 200].forEach(function (a) { $('#icM' + a).classList.toggle('on', s.row === a); });
+      $('#icM200v').textContent = s.m;
+      $('#icCap').innerHTML = s.t;
+      $$('i', dots).forEach(function (d, k) { d.classList.toggle('now', k === i); });
+      $('#icBack').disabled = i === 0;
+      $('#icNext').disabled = i === S.length - 1;
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; $('#icAuto').textContent = '⏵ تلقائي'; } }
+    $('#icNext').addEventListener('click', function () { stop(); if (i < S.length - 1) i++; render(); });
+    $('#icBack').addEventListener('click', function () { stop(); if (i > 0) i--; render(); });
+    $('#icReset').addEventListener('click', function () { stop(); i = 0; render(); });
+    $('#icAuto').addEventListener('click', function () {
+      if (timer) { stop(); return; }
+      if (i === S.length - 1) i = 0;
+      $('#icAuto').textContent = '⏸ وقّف';
+      render();
+      timer = setInterval(function () { if (i < S.length - 1) { i++; render(); } else stop(); }, 2300);
+    });
+    render();
+  })();
+
+  /* ---------- D · timing diagram ---------- */
+  (function () {
+    var svg = $('#tmSvg'); if (!svg) return;
+    var mode = 'read', step = 0;
+    var X0 = 130, X1 = 340, X2 = 550, XE = 612, CUR = [150, 350, 445, 560];
+    var CAP = {
+      read: [
+        ['CPU', 'بداية الـ ' + EN('clock cycle 1') + ': الـ microprocessor بيحط الـ <b>address</b> على الـ address bus.'],
+        ['CPU', 'بعد ' + EN('clock cycle') + ' واحد (عشان الذاكرة تلحق تفك الـ address وتجيب الـ data) الـ microprocessor بيفعّل (' + EN('assert') + ') إشارة <b>READ</b>.'],
+        ['Memory → CPU', 'READ مفعّلة، فالذاكرة بتحط الـ <b>data</b> على الـ data bus، والـ microprocessor بيقرا الـ data من الـ bus ويخزّنها في واحد من الـ registers.'],
+        ['Memory', 'في آخر الـ cycle: الـ microprocessor يشيل الـ address ويلغي READ (' + EN('deassert') + ')، وبعدها الذاكرة تشيل الـ data من الـ data bus، وكده الـ <b>memory read</b> خلصت ✅']
+      ],
+      write: [
+        ['CPU', 'في أول ' + EN('clock pulse') + ': الـ processor بيحط الـ <b>address والـ data</b> مع بعض على الـ system bus.'],
+        ['CPU', 'بعدها بيفعّل (' + EN('assert') + ') إشارة <b>WRITE</b> — بتكون مفعّلة في الـ ' + EN('clock cycle') + ' التاني.'],
+        ['CPU → Memory', 'WRITE مفعّلة، فالذاكرة بتخزّن الـ <b>data</b> اللي على الـ data bus في الـ address ده.'],
+        ['CPU', 'في آخر الـ ' + EN('second clock cycle') + ': الـ processor يشيل الـ address والـ data من الـ bus ويلغي WRITE (' + EN('deassert') + ')، وكده الـ <b>memory write</b> خلصت ✅']
+      ]
+    };
+    function el(n, a, txt, par) {
+      var e = document.createElementNS(NS, n);
+      for (var k in a) e.setAttribute(k, a[k]);
+      if (txt != null) e.textContent = txt;
+      (par || svg).appendChild(e); return e;
+    }
+    function hex(x1, x2, y, cls, par) { return el('path', { class: cls, d: 'M' + x1 + ',' + y + ' L' + (x1 + 11) + ',' + (y - 15) + ' H' + (x2 - 11) + ' L' + x2 + ',' + y + ' L' + (x2 - 11) + ',' + (y + 15) + ' H' + (x1 + 11) + ' Z' }, null, par); }
+    function signals(par) {
+      el('path', { class: 'sg-clk', d: 'M112,62 H130 V30 H235 V62 H340 V30 H445 V62 H550 V30 H612' }, null, par);
+      el('path', { class: 'sg-idle', d: 'M112,112 H130' }, null, par);
+      el('path', { class: 'sg-idle', d: 'M550,112 H612' }, null, par);
+      hex(X0, X2, 112, 'sg-a', par);
+      el('text', { x: 340, y: 117, 'text-anchor': 'middle' }, 'Address', par);
+      if (mode === 'read') {
+        el('path', { class: 'sg-idle', d: 'M112,172 H340' }, null, par);
+        el('path', { class: 'sg-idle', d: 'M550,172 H612' }, null, par);
+        hex(X1, X2, 172, 'sg-d', par);
+        el('text', { x: 445, y: 177, 'text-anchor': 'middle' }, 'Data', par);
+      } else {
+        el('path', { class: 'sg-idle', d: 'M112,172 H130' }, null, par);
+        el('path', { class: 'sg-idle', d: 'M550,172 H612' }, null, par);
+        hex(X0, X2, 172, 'sg-d', par);
+        el('text', { x: 340, y: 177, 'text-anchor': 'middle' }, 'Data', par);
+      }
+      el('path', { class: 'sg-c', d: 'M112,236 H340 V206 H550 V236 H612' }, null, par);
+    }
+    function draw() {
+      svg.innerHTML = '';
+      var defs = el('defs', {});
+      var cp = el('clipPath', { id: 'tmClip' }, null, defs);
+      el('rect', { id: 'tmClipR', x: 0, y: 0, width: CUR[step], height: 262 }, null, cp);
+      /* grid + labels */
+      [X0, X1, X2].forEach(function (x) { el('line', { class: 'sg-grid', x1: x, y1: 14, x2: x, y2: 250 }); });
+      el('text', { x: (X0 + X1) / 2, y: 14, 'text-anchor': 'middle', class: 'sm' }, 'clock cycle 1');
+      el('text', { x: (X1 + X2) / 2, y: 14, 'text-anchor': 'middle', class: 'sm' }, 'clock cycle 2');
+      el('text', { x: 104, y: 52, 'text-anchor': 'end' }, 'CLK');
+      el('text', { x: 104, y: 117, 'text-anchor': 'end' }, 'Address bus');
+      el('text', { x: 104, y: 177, 'text-anchor': 'end' }, 'Data bus');
+      el('text', { x: 104, y: 226, 'text-anchor': 'end' }, mode === 'read' ? 'READ' : 'WRITE');
+      var ghost = el('g', { class: 'sg-ghost' }); signals(ghost);
+      var live = el('g', { 'clip-path': 'url(#tmClip)' }); signals(live);
+      el('line', { id: 'tmCur', class: 'sg-cur', x1: CUR[step], y1: 20, x2: CUR[step], y2: 250 });
+    }
+    function cap() {
+      var c = CAP[mode][step];
+      $('#tmCap').innerHTML = '<span class="who">' + c[0] + '</span><b>الخطوة ' + (step + 1) + ' / 4:</b> ' + c[1];
+      $('#tmBack').disabled = step === 0; $('#tmNext').disabled = step === 3;
+    }
+    function upd() {
+      var r = $('#tmClipR'), c = $('#tmCur');
+      r.setAttribute('width', CUR[step]); c.setAttribute('x1', CUR[step]); c.setAttribute('x2', CUR[step]);
+      cap();
+    }
+    $('#tmNext').addEventListener('click', function () { if (step < 3) { step++; upd(); } });
+    $('#tmBack').addEventListener('click', function () { if (step > 0) { step--; upd(); } });
+    $('#tmReset').addEventListener('click', function () { step = 0; upd(); });
+    $$('#tmMode [data-m]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        mode = b.dataset.m; step = 0;
+        $$('#tmMode [data-m]').forEach(function (x) { x.classList.toggle('on', x === b); });
+        draw(); cap();
+      });
+    });
+    draw(); cap();
+  })();
+
+  /* ---------- E · memory chip ---------- */
+  (function () {
+    var card = $('#chipCard'); if (!card) return;
+    var n = 3, w = 8, addr = 5;
+    function bit(r, c) { return ((r * 37 + c * 11 + 5) % 7) < 3 ? 1 : 0; }
+    function bin(v, len) { var s = v.toString(2); while (s.length < len) s = '0' + s; return s; }
+    function fmt(x) { return Number(x).toLocaleString('en-US'); }
+    function render() {
+      var rows = 1 << n; if (addr >= rows) addr = rows - 1;
+      $('#chNv').textContent = n;
+      /* address bits */
+      var ab = $('#chAddr'); ab.innerHTML = '';
+      for (var k = n - 1; k >= 0; k--) {
+        (function (k) {
+          var b = document.createElement('button'); b.type = 'button';
+          var v = (addr >> k) & 1;
+          b.innerHTML = '<b>' + v + '</b><small>A' + k + '</small>';
+          b.addEventListener('click', function () { addr ^= (1 << k); render(); });
+          ab.appendChild(b);
+        })(k);
+      }
+      var lab = document.createElement('span'); lab.className = 'en muted'; lab.style.marginInlineStart = '10px';
+      lab.textContent = '= ' + bin(addr, n) + '₂ = ' + addr; ab.appendChild(lab);
+      /* grid */
+      var g = $('#chGrid'); g.innerHTML = '';
+      for (var r = 0; r < rows; r++) {
+        var row = document.createElement('div'); row.className = 'mrow' + (r === addr ? ' on' : ''); row.dataset.r = r;
+        var h = '<span class="maddr">' + bin(r, n) + '</span><span class="wl" title="word line"></span>';
+        for (var c = 0; c < w; c++) h += '<span class="cell">' + bit(r, c) + '</span>';
+        row.innerHTML = h;
+        row.addEventListener('click', (function (r) { return function () { addr = r; render(); }; })(r));
+        g.appendChild(row);
+      }
+      var word = ''; for (var c2 = 0; c2 < w; c2++) word += bit(addr, c2);
+      $('#chLoc').textContent = fmt(rows);
+      $('#chBits').textContent = w;
+      $('#chTot').textContent = fmt(rows * w);
+      $('#chOut').textContent = word;
+    }
+    $('#chN').addEventListener('input', function (e) { n = +e.target.value; render(); });
+    $$('#chW [data-w]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        w = +b.dataset.w;
+        $$('#chW [data-w]').forEach(function (x) { x.classList.toggle('on', x === b); });
+        render();
+      });
+    });
+    render();
+
+    /* capacity calculator */
+    var cn = $('#cpN'), cw = $('#cpW');
+    function pretty(bytes) {
+      var u = [['GB', 1073741824], ['MB', 1048576], ['KB', 1024]];
+      for (var i = 0; i < u.length; i++) if (bytes >= u[i][1]) { var v = bytes / u[i][1]; return (Math.round(v * 100) / 100) + ' ' + u[i][0]; }
+      return bytes + ' bytes';
+    }
+    function calc() {
+      var N = Math.max(1, Math.min(40, parseInt(cn.value, 10) || 1)), W = Math.max(1, Math.min(128, parseInt(cw.value, 10) || 1));
+      var loc = Math.pow(2, N), bits = loc * W, bytes = bits / 8;
+      $('#cpLoc').textContent = fmt(loc);
+      $('#cpBits').textContent = fmt(bits);
+      $('#cpBytes').textContent = fmt(bytes);
+      $('#cpPretty').textContent = pretty(bytes);
+    }
+    cn.addEventListener('input', calc); cw.addEventListener('input', calc);
+    $$('#capCard [data-p]').forEach(function (b) {
+      b.addEventListener('click', function () { var p = b.dataset.p.split(','); cn.value = p[0]; cw.value = p[1]; calc(); });
+    });
+    calc();
+  })();
+})();
+</script>
+</body>
+</html>
